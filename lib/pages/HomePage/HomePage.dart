@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+// import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:nex_planner/pages/HomePage/GradientContainer.dart';
 
 import 'CategoryTab.dart';
@@ -148,22 +148,30 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     items: [
                       CategoryItem(
                         icon: Icons.school,
-                        title: 'Academics',
-                        description: 'All academic related information.',
+                        title: 'About JIT',
+                        description:
+                            'Brief description about Jimma Institute of Technology University.',
                       ),
                       CategoryItem(
-                        icon: Icons.book,
-                        title: 'Courses',
-                        description: 'Details about courses.',
+                        icon: Icons.calendar_month,
+                        title: 'Academic Calendar',
+                        description:
+                            'Academic calendar of five consecutive years.',
+                      ),
+                      CategoryItem(
+                        icon: Icons.home,
+                        title: 'Departments',
+                        description:
+                            'Departments currently available in the university.',
                       ),
                     ],
                   ),
                   CategoryTab(
                     items: [
                       CategoryItem(
-                        icon: Icons.build,
-                        title: 'Services',
-                        description: 'All available services.',
+                        icon: Icons.menu_book,
+                        title: 'Cafe Menu',
+                        description: 'Read menu for students cafe.',
                       ),
                     ],
                   ),
@@ -194,9 +202,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   CategoryTab(
                     items: [
                       CategoryItem(
-                        icon: Icons.school,
-                        title: 'Campus Life',
-                        description: 'Information about campus life.',
+                        icon: Icons.browse_gallery,
+                        title: 'Gallery',
+                        description: 'University gallery.',
+                      ),
+                      CategoryItem(
+                        icon: Icons.heat_pump_sharp,
+                        title: 'Religious',
+                        description: 'Religious clubs in the campus',
+                      ),
+                      CategoryItem(
+                        icon: Icons.grading_rounded,
+                        title: 'My Grade',
+                        description:
+                            'See your grade from the official website of the university',
                       ),
                     ],
                   ),
@@ -206,19 +225,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ],
         ),
       ),
-      bottomNavigationBar: ConvexAppBar(
-        backgroundColor: const Color(0xFF6431F4),
-        items: const [
-          TabItem(icon: Icons.home, title: 'Home'),
-          TabItem(icon: Icons.settings, title: 'settings'),
-          TabItem(icon: Icons.school, title: 'academics'),
-          TabItem(icon: Icons.person, title: 'Profile'),
-        ],
-        controller: _bottomNavController,
-        onTap: (int index) {
-          _bottomNavController.animateTo(index);
-        },
-      ),
+      // bottomNavigationBar: ConvexAppBar(
+      //   backgroundColor: const Color(0xFF6431F4),
+      //   items: const [
+      //     TabItem(icon: Icons.home, title: 'Home'),
+      //     TabItem(icon: Icons.settings, title: 'settings'),
+      //     TabItem(icon: Icons.school, title: 'academics'),
+      //     TabItem(icon: Icons.person, title: 'Profile'),
+      //   ],
+      //   controller: _bottomNavController,
+      //   onTap: (int index) {
+      //     _bottomNavController.animateTo(index);
+      //   },
+      // ),
     );
   }
 }

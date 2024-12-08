@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:nex_planner/pages/Category/Tools/DailyReminder/DailyReminder.dart';
 
 class GradientContainer extends StatelessWidget {
   const GradientContainer({Key? key}) : super(key: key);
@@ -46,6 +47,8 @@ class GradientContainer extends StatelessWidget {
                     minimumSize: const Size(0, 30), // Size of the button
                   ),
                   onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const DailyReminder()));
                     // Implement add task action here
                   },
                   child: const Text(
