@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'Tools/GradeCalculator.dart';
-import 'Tools/ClassSchedule.dart';
-import 'Tools/DailyReminder.dart';
+import 'Tools/ClassSchedule/ClassSchedule.dart';
+import 'Tools/DailyReminder/DailyReminder.dart';
 import 'Tools/NoteSaver.dart';
 
 class CategoryDetailScreen extends StatelessWidget {
