@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-
-import '../../model/CategoryItem.dart';
-import '../CategoryDetailScreen.dart';
+import 'package:nex_planner/pages/Category/CategoryDetailScreen.dart';
 
 class CategoryTab extends StatelessWidget {
-  final List<CategoryItem> items;
+  final List<Item> items;
 
-  const CategoryTab({
-    super.key,
-    required this.items,
-  });
+  const CategoryTab({Key? key, required this.items}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +17,8 @@ class CategoryTab extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => CategoryDetailScreen(
-                  icon: item.icon,
-                  title: item.title,
-                  description: item.description,
-                ),
+                builder: (context) =>
+                    CategoryDetailScreen(categoryName: item.title),
               ),
             );
           },
@@ -38,27 +30,39 @@ class CategoryTab extends StatelessWidget {
               borderRadius: BorderRadius.circular(12.0),
             ),
             child: Row(
-              children: <Widget>[
-                Icon(item.icon, size: 40),
+              children: [
+                if (item is CategoryItem) Icon(item.icon), // Leading icon
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        item.title,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(item.description),
-                    ],
-                  ),
+                  child: Text(item.title),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.more_vert),
-                  onPressed: () {
-                    // Implement expandable menu action here
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'open') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              CategoryDetailScreen(categoryName: item.title),
+                        ),
+                      );
+                    } else if (value == 'pin') {
+                      // Handle pin to top logic
+                    }
                   },
+                  itemBuilder: (BuildContext context) {
+                    return [
+                      const PopupMenuItem(
+                        value: 'open',
+                        child: Text('Open'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'pin',
+                        child: Text('Pin to top'),
+                      ),
+                    ];
+                  },
+                  icon: const Icon(Icons.more_vert), // Trailing icon
                 ),
               ],
             ),
@@ -67,4 +71,21 @@ class CategoryTab extends StatelessWidget {
       },
     );
   }
+}
+
+class Item {
+  final String title;
+
+  Item(this.title);
+}
+
+class CategoryItem extends Item {
+  final IconData icon;
+  final String description;
+
+  CategoryItem({
+    required this.icon,
+    required String title,
+    required this.description,
+  }) : super(title);
 }

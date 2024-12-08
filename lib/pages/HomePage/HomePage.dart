@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 
-import '../../model/CategoryItem.dart';
-import '../CategoryDetailScreen.dart';
 import 'CategoryTab.dart';
 
 class HomePage extends StatefulWidget {
@@ -51,7 +49,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             actions: <Widget>[
               IconButton(
                 icon: const CircleAvatar(
-                  backgroundImage: AssetImage('lib/assets/image1.png'), // Replace with your profile image asset
+                  backgroundImage: AssetImage(
+                      'lib/assets/image1.png'), // Replace with your profile image asset
                 ),
                 onPressed: () {
                   // Implement profile action here
@@ -105,7 +104,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   children: <Widget>[
                     Text(
                       'Hello Anwar',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'how is your study',
@@ -123,7 +123,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0,),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 10.0,
+              ),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF6767B3), Color(0xFF6431F4)],
@@ -146,7 +149,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       children: <Widget>[
                         const Text(
                           'Daily Reminder',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         const Text('0 assignment'),
@@ -156,7 +160,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black, // Background color
-                            minimumSize: const Size(0, 30), // Size of the button
+                            minimumSize:
+                                const Size(0, 30), // Size of the button
                           ),
                           onPressed: () {
                             // Implement add task action here
@@ -219,9 +224,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   CategoryTab(
                     items: [
                       CategoryItem(
-                        icon: Icons.settings,
-                        title: 'Tools',
-                        description: 'Various tools for students.',
+                        icon: Icons.calculate,
+                        title: 'Grade Calculator',
+                        description: 'Academic year result grade calculator.',
+                      ),
+                      CategoryItem(
+                        icon: Icons.calendar_month,
+                        title: 'Class Schedule',
+                        description: 'Academic year result grade calculator.',
+                      ),
+                      CategoryItem(
+                        icon: Icons.lock_clock,
+                        title: 'Daily Reminder',
+                        description: 'Academic year result grade calculator.',
+                      ),
+                      CategoryItem(
+                        icon: Icons.note_add,
+                        title: 'Note Saver',
+                        description: 'Academic year result grade calculator.',
                       ),
                     ],
                   ),
@@ -241,7 +261,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
       ),
       bottomNavigationBar: ConvexAppBar(
-        backgroundColor: Color(0xFF6431F4),
+        backgroundColor: const Color(0xFF6431F4),
         items: const [
           TabItem(icon: Icons.home, title: 'Home'),
           TabItem(icon: Icons.settings, title: 'settings'),
