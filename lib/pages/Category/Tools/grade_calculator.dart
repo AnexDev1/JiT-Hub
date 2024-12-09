@@ -13,153 +13,161 @@ class _GradeCalculatorState extends State<GradeCalculator> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView(
-            children: [
-              Table(
-                border: TableBorder.all(),
-                columnWidths: const {
-                  0: FlexColumnWidth(2),
-                  1: FlexColumnWidth(1),
-                  2: FlexColumnWidth(1),
-                },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Grade Calculator'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
                 children: [
-                  TableRow(
+                  Table(
+                    border: TableBorder.all(),
+                    columnWidths: const {
+                      0: FlexColumnWidth(2),
+                      1: FlexColumnWidth(1),
+                      2: FlexColumnWidth(1),
+                    },
                     children: [
-                      TableCell(
-                        child: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          child: const Text('Course'),
-                        ),
+                      TableRow(
+                        children: [
+                          TableCell(
+                            child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              child: const Text('Course'),
+                            ),
+                          ),
+                          TableCell(
+                            child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              child: const Text('Credit Hour'),
+                            ),
+                          ),
+                          TableCell(
+                            child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              child: const Text('Grade'),
+                            ),
+                          ),
+                        ],
                       ),
-                      TableCell(
-                        child: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          child: const Text('Credit Hour'),
-                        ),
+                      ..._logic.courses.map((course) {
+                        return TableRow(
+                          children: [
+                            TableCell(
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TextField(
+                                  controller: course['course'],
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    hintText: 'Enter course',
+                                  ),
+                                ),
+                              ),
+                            ),
+                            TableCell(
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                child: DropdownButton<int>(
+                                  isExpanded: true,
+                                  value: course['creditHour'],
+                                  items: List.generate(10, (index) {
+                                    return DropdownMenuItem(
+                                      value: index + 1,
+                                      child: Text('${index + 1}'),
+                                    );
+                                  }),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      course['creditHour'] = value;
+                                    });
+                                  },
+                                  hint: const Text('Select'),
+                                ),
+                              ),
+                            ),
+                            TableCell(
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                child: DropdownButton<String>(
+                                  isExpanded: true,
+                                  value: course['grade'],
+                                  items: ['A', 'B', 'C', 'D', 'F'].map((grade) {
+                                    return DropdownMenuItem(
+                                      value: grade,
+                                      child: Text(grade),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      course['grade'] = value;
+                                    });
+                                  },
+                                  hint: const Text('Select'),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _logic.addCourse();
+                          });
+                        },
+                        child: const Text('Add'),
                       ),
-                      TableCell(
-                        child: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          child: const Text('Grade'),
-                        ),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _logic.calculateGPA();
+                          });
+                        },
+                        child: const Text('Calculate'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _logic.resetFields();
+                          });
+                        },
+                        child: const Text('Reset'),
                       ),
                     ],
                   ),
-                  ..._logic.courses.map((course) {
-                    return TableRow(
-                      children: [
-                        TableCell(
-                          child: Container(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextField(
-                              controller: course['course'],
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: 'Enter course',
-                              ),
-                            ),
-                          ),
-                        ),
-                        TableCell(
-                          child: Container(
-                            padding: const EdgeInsets.all(8.0),
-                            child: DropdownButton<int>(
-                              isExpanded: true,
-                              value: course['creditHour'],
-                              items: List.generate(10, (index) {
-                                return DropdownMenuItem(
-                                  value: index + 1,
-                                  child: Text('${index + 1}'),
-                                );
-                              }),
-                              onChanged: (value) {
-                                setState(() {
-                                  course['creditHour'] = value;
-                                });
-                              },
-                              hint: const Text('Select'),
-                            ),
-                          ),
-                        ),
-                        TableCell(
-                          child: Container(
-                            padding: const EdgeInsets.all(8.0),
-                            child: DropdownButton<String>(
-                              isExpanded: true,
-                              value: course['grade'],
-                              items: ['A', 'B', 'C', 'D', 'F'].map((grade) {
-                                return DropdownMenuItem(
-                                  value: grade,
-                                  child: Text(grade),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  course['grade'] = value;
-                                });
-                              },
-                              hint: const Text('Select'),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _logic.addCourse();
-                      });
-                    },
-                    child: const Text('Add'),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total Credit Hours:'),
+                      Text('${_logic.totalCreditHours}'),
+                    ],
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _logic.calculateGPA();
-                      });
-                    },
-                    child: const Text('Calculate'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _logic.resetFields();
-                      });
-                    },
-                    child: const Text('Reset'),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('GPA:'),
+                      Text(_logic.gpa.toStringAsFixed(2)),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Total Credit Hours:'),
-                  Text('${_logic.totalCreditHours}'),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('GPA:'),
-                  Text(_logic.gpa.toStringAsFixed(2)),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

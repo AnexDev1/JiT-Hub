@@ -20,7 +20,7 @@ class Departments extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Faculties and Schools'),
+        title: const Text('Faculties and Schools'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -63,7 +63,7 @@ class Departments extends StatelessWidget {
                         color: Colors.black54,
                         child: Text(
                           department,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16.0,
                             fontWeight: FontWeight.bold,
@@ -125,7 +125,7 @@ class DepartmentDetailScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Text(
             departmentDetail,
-            style: TextStyle(fontSize: 16.0),
+            style: const TextStyle(fontSize: 16.0),
           ),
         ),
       ),

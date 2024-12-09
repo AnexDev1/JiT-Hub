@@ -28,7 +28,7 @@ class CategoryDetailScreen extends StatelessWidget {
       'About JIT': AboutJit(),
       'Grade Calculator': const GradeCalculator(),
       'Class Schedule': const ClassSchedule(),
-      'Daily Reminder': const DailyReminder(),
+      'Daily Reminder': DailyReminder(),
       'Note Saver': const NoteSaver(),
     };
 

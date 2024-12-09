@@ -1,131 +1,94 @@
 import 'package:flutter/material.dart';
 
-class AddReminderModal extends StatefulWidget {
-  final Function(Map<String, dynamic>) onAddReminder;
+class ReminderModal extends StatefulWidget {
+  final Function onAddReminder;
+  final Function onAddReminderCallback;
 
-  const AddReminderModal({super.key, required this.onAddReminder});
+  ReminderModal(
+      {required this.onAddReminder, required this.onAddReminderCallback});
 
   @override
-  _AddReminderModalState createState() => _AddReminderModalState();
+  _ReminderModalState createState() => _ReminderModalState();
 }
 
-class _AddReminderModalState extends State<AddReminderModal> {
+class _ReminderModalState extends State<ReminderModal> {
   final TextEditingController _noteController = TextEditingController();
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   bool _remindMe = false;
-  String _selectedCategory = 'Assignment';
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
-
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (picked != null && picked != _selectedTime) {
-      setState(() {
-        _selectedTime = picked;
-      });
-    }
-  }
+  String? _selectedCategory;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 16,
-        right: 16,
-        top: 16,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Add Reminder',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _noteController,
-            decoration: const InputDecoration(
-              labelText: 'Type the note here',
-              border: OutlineInputBorder(),
+    return SingleChildScrollView(
+      child: AlertDialog(
+        title: const Text('Add Reminder'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _noteController,
+              decoration: const InputDecoration(labelText: 'Note'),
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _selectedDate != null
-                      ? 'Date: ${_selectedDate!.toLocal()}'.split(' ')[1]
-                      : 'No date selected',
-                  style: const TextStyle(color: Colors.black),
+            const SizedBox(height: 8.0),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _selectedDate == null
+                        ? 'No date chosen!'
+                        : 'Picked Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}',
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.calendar_today),
-                onPressed: () => _selectDate(context),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _selectedTime != null
-                      ? 'Time: ${_selectedTime!.format(context)}'
-                      : 'No time selected',
+                TextButton(
+                  onPressed: _presentDatePicker,
+                  child: const Text('Choose Date'),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.access_time),
-                onPressed: () => _selectTime(context),
-              ),
-            ],
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _selectedTime == null
+                        ? 'No time chosen!'
+                        : 'Picked Time: ${_selectedTime!.format(context)}',
+                  ),
+                ),
+                TextButton(
+                  onPressed: _presentTimePicker,
+                  child: const Text('Choose Time'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8.0),
+            Row(
+              children: [
+                const Text('Remind Me'),
+                Switch(
+                  value: _remindMe,
+                  onChanged: (value) {
+                    setState(() {
+                      _remindMe = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 8.0),
+            _buildCategoryOption('Assignment'),
+            _buildCategoryOption('Exam'),
+            _buildCategoryOption('Study'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel'),
           ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Remind me'),
-              Switch(
-                value: _remindMe,
-                onChanged: (value) {
-                  setState(() {
-                    _remindMe = value;
-                  });
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const Text('Select Category'),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildCategoryOption('Assignment'),
-              _buildCategoryOption('Exam'),
-              _buildCategoryOption('Other'),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
+          TextButton(
             onPressed: () {
               if (_noteController.text.isNotEmpty &&
                   _selectedDate != null &&
@@ -138,6 +101,7 @@ class _AddReminderModalState extends State<AddReminderModal> {
                   'category': _selectedCategory,
                 });
                 Navigator.pop(context);
+                // widget.onAddReminderCallback(); // Call the callback function
               }
             },
             child: const Text('Add'),
@@ -162,5 +126,31 @@ class _AddReminderModalState extends State<AddReminderModal> {
         Text(category),
       ],
     );
+  }
+
+  void _presentDatePicker() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (pickedDate != null && pickedDate != _selectedDate) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    }
+  }
+
+  void _presentTimePicker() async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (pickedTime != null && pickedTime != _selectedTime) {
+      setState(() {
+        _selectedTime = pickedTime;
+      });
+    }
   }
 }

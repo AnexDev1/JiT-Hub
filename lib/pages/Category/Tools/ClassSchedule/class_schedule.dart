@@ -47,6 +47,9 @@ class _ClassScheduleState extends State<ClassSchedule>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Class Schedule'),
+      ),
       body: Column(
         children: [
           TabBar(

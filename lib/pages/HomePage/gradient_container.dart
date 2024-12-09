@@ -48,7 +48,7 @@ class GradientContainer extends StatelessWidget {
                   ),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const DailyReminder()));
+                        builder: (context) => DailyReminder()));
                     // Implement add task action here
                   },
                   child: const Text(
