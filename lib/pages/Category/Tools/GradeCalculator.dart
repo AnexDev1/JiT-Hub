@@ -46,10 +46,20 @@ class _GradeCalculatorState extends State<GradeCalculator> {
 
   double _gradeToPoint(String grade) {
     switch (grade) {
+      case 'A+':
+        return 4.0;
       case 'A':
         return 4.0;
+      case 'A-':
+        return 3.75;
+      case 'B+':
+        return 3.50;
       case 'B':
         return 3.0;
+      case 'B-':
+        return 2.75;
+      case 'C+':
+        return 2.50;
       case 'C':
         return 2.0;
       case 'D':
@@ -63,11 +73,12 @@ class _GradeCalculatorState extends State<GradeCalculator> {
 
   void _resetFields() {
     setState(() {
-      for (var course in _courses) {
-        course['course'].clear();
-        course['creditHour'] = null;
-        course['grade'] = null;
-      }
+      _courses.clear();
+      _courses.addAll([
+        {'course': TextEditingController(), 'creditHour': null, 'grade': null},
+        {'course': TextEditingController(), 'creditHour': null, 'grade': null},
+        {'course': TextEditingController(), 'creditHour': null, 'grade': null},
+      ]);
       _totalCreditHours = 0;
       _gpa = 0.0;
     });
@@ -131,7 +142,7 @@ class _GradeCalculatorState extends State<GradeCalculator> {
                             child: DropdownButton<int>(
                               isExpanded: true,
                               value: course['creditHour'],
-                              items: List.generate(10, (index) {
+                              items: List.generate(6, (index) {
                                 return DropdownMenuItem(
                                   value: index + 1,
                                   child: Text('${index + 1}'),
@@ -152,7 +163,18 @@ class _GradeCalculatorState extends State<GradeCalculator> {
                             child: DropdownButton<String>(
                               isExpanded: true,
                               value: course['grade'],
-                              items: ['A', 'B', 'C', 'D', 'F'].map((grade) {
+                              items: [
+                                'A+',
+                                'A',
+                                'A-',
+                                'B+',
+                                'B',
+                                'B-',
+                                'C+',
+                                'C',
+                                'D',
+                                'F'
+                              ].map((grade) {
                                 return DropdownMenuItem(
                                   value: grade,
                                   child: Text(grade),

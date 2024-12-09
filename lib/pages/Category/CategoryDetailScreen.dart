@@ -6,7 +6,6 @@ import 'Tools/NoteSaver.dart';
 
 class CategoryDetailScreen extends StatelessWidget {
   final String categoryName;
-
   const CategoryDetailScreen({Key? key, required this.categoryName})
       : super(key: key);
 
@@ -24,17 +23,14 @@ class CategoryDetailScreen extends StatelessWidget {
   }
 
   Widget _buildContent() {
-    switch (categoryName) {
-      case 'Grade Calculator':
-        return const GradeCalculator();
-      case 'Class Schedule':
-        return const ClassSchedule();
-      case 'Daily Reminder':
-        return const DailyReminder();
-      case 'Note Saver':
-        return const NoteSaver();
-      default:
-        return Center(child: Text('Content for $categoryName'));
-    }
+    final Map<String, Widget> categoryWidgets = {
+      'Grade Calculator': const GradeCalculator(),
+      'Class Schedule': const ClassSchedule(),
+      'Daily Reminder': const DailyReminder(),
+      'Note Saver': const NoteSaver(),
+    };
+
+    return categoryWidgets[categoryName] ??
+        Center(child: Text('Content for $categoryName'));
   }
 }
