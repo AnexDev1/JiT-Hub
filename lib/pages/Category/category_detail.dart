@@ -1,13 +1,14 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
-import 'Tools/GradeCalculator.dart';
-import 'Tools/ClassSchedule/ClassSchedule.dart';
-import 'Tools/DailyReminder/DailyReminder.dart';
-import 'Tools/NoteSaver.dart';
+import 'Tools/grade_calculator.dart';
+import 'Tools/ClassSchedule/class_schedule.dart';
+import 'Tools/DailyReminder/daily_reminder.dart';
+import 'Tools/note_saver.dart';
 
 class CategoryDetailScreen extends StatelessWidget {
   final String categoryName;
-  const CategoryDetailScreen({Key? key, required this.categoryName})
-      : super(key: key);
+  const CategoryDetailScreen({super.key, required this.categoryName});
 
   @override
   Widget build(BuildContext context) {

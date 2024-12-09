@@ -1,56 +1,9 @@
 import 'package:flutter/material.dart';
 
-class DailyReminder extends StatefulWidget {
-  const DailyReminder({Key? key}) : super(key: key);
-
-  @override
-  _DailyReminderState createState() => _DailyReminderState();
-}
-
-class _DailyReminderState extends State<DailyReminder> {
-  final List<Map<String, dynamic>> _reminders = [];
-
-  void _addReminder(Map<String, dynamic> reminder) {
-    setState(() {
-      _reminders.add(reminder);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _reminders.isEmpty
-          ? const Center(child: Text('You haven\'t added any tasks yet.'))
-          : ListView.builder(
-              itemCount: _reminders.length,
-              itemBuilder: (context, index) {
-                final reminder = _reminders[index];
-                return ListTile(
-                  title: Text(reminder['note']),
-                  subtitle: Text(
-                      '${reminder['date']} at ${reminder['time']} - ${reminder['category']}'),
-                );
-              },
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => AddReminderModal(onAddReminder: _addReminder),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
-
 class AddReminderModal extends StatefulWidget {
   final Function(Map<String, dynamic>) onAddReminder;
 
-  const AddReminderModal({Key? key, required this.onAddReminder})
-      : super(key: key);
+  const AddReminderModal({super.key, required this.onAddReminder});
 
   @override
   _AddReminderModalState createState() => _AddReminderModalState();
@@ -121,7 +74,7 @@ class _AddReminderModalState extends State<AddReminderModal> {
                   _selectedDate != null
                       ? 'Date: ${_selectedDate!.toLocal()}'.split(' ')[1]
                       : 'No date selected',
-                  style: TextStyle(color: Colors.black),
+                  style: const TextStyle(color: Colors.black),
                 ),
               ),
               IconButton(

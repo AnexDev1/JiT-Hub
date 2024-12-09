@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 class AddSchedulePage extends StatefulWidget {
   final Function(String, String, String) onAddSchedule;
 
-  const AddSchedulePage({Key? key, required this.onAddSchedule})
-      : super(key: key);
+  const AddSchedulePage({super.key, required this.onAddSchedule});
 
   @override
   _AddSchedulePageState createState() => _AddSchedulePageState();

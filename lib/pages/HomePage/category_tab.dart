@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:nex_planner/pages/Category/CategoryDetailScreen.dart';
+import 'package:nex_planner/pages/Category/category_detail.dart';
 
 class CategoryTab extends StatelessWidget {
   final List<Item> items;
 
-  const CategoryTab({Key? key, required this.items}) : super(key: key);
+  const CategoryTab({super.key, required this.items});
 
   @override
   Widget build(BuildContext context) {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 // import 'package:convex_bottom_bar/convex_bottom_bar.dart';
-import 'package:nex_planner/pages/HomePage/GradientContainer.dart';
+import 'package:nex_planner/pages/HomePage/gradient_container.dart';
 
-import 'CategoryTab.dart';
+import 'category_tab.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

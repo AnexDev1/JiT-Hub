@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'AddSchedulePage.dart';
+import 'add_schedule.dart';
 
 class ClassSchedule extends StatefulWidget {
-  const ClassSchedule({Key? key}) : super(key: key);
+  const ClassSchedule({super.key});
 
   @override
   _ClassScheduleState createState() => _ClassScheduleState();

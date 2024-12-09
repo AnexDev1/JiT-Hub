@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:nex_planner/pages/Category/Tools/DailyReminder/DailyReminder.dart';
+import 'package:nex_planner/pages/Category/Tools/DailyReminder/daily_reminder.dart';
 
 class GradientContainer extends StatelessWidget {
-  const GradientContainer({Key? key}) : super(key: key);
+  const GradientContainer({super.key});
 
   @override
   Widget build(BuildContext context) {

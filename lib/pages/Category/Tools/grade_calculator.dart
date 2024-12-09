@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nex_planner/services/grade_calc_service.dart';
 
 class GradeCalculator extends StatefulWidget {
   const GradeCalculator({Key? key}) : super(key: key);
@@ -8,81 +9,7 @@ class GradeCalculator extends StatefulWidget {
 }
 
 class _GradeCalculatorState extends State<GradeCalculator> {
-  final List<Map<String, dynamic>> _courses = [
-    {'course': TextEditingController(), 'creditHour': null, 'grade': null},
-    {'course': TextEditingController(), 'creditHour': null, 'grade': null},
-    {'course': TextEditingController(), 'creditHour': null, 'grade': null},
-  ];
-
-  int _totalCreditHours = 0;
-  double _gpa = 0.0;
-
-  void _addCourse() {
-    setState(() {
-      _courses.add({
-        'course': TextEditingController(),
-        'creditHour': null,
-        'grade': null
-      });
-    });
-  }
-
-  void _calculateGPA() {
-    int totalCreditHours = 0;
-    double totalPoints = 0.0;
-
-    for (var course in _courses) {
-      if (course['creditHour'] != null && course['grade'] != null) {
-        totalCreditHours += course['creditHour'] as int;
-        totalPoints += course['creditHour'] * _gradeToPoint(course['grade']);
-      }
-    }
-
-    setState(() {
-      _totalCreditHours = totalCreditHours;
-      _gpa = totalCreditHours > 0 ? totalPoints / totalCreditHours : 0.0;
-    });
-  }
-
-  double _gradeToPoint(String grade) {
-    switch (grade) {
-      case 'A+':
-        return 4.0;
-      case 'A':
-        return 4.0;
-      case 'A-':
-        return 3.75;
-      case 'B+':
-        return 3.50;
-      case 'B':
-        return 3.0;
-      case 'B-':
-        return 2.75;
-      case 'C+':
-        return 2.50;
-      case 'C':
-        return 2.0;
-      case 'D':
-        return 1.0;
-      case 'F':
-        return 0.0;
-      default:
-        return 0.0;
-    }
-  }
-
-  void _resetFields() {
-    setState(() {
-      _courses.clear();
-      _courses.addAll([
-        {'course': TextEditingController(), 'creditHour': null, 'grade': null},
-        {'course': TextEditingController(), 'creditHour': null, 'grade': null},
-        {'course': TextEditingController(), 'creditHour': null, 'grade': null},
-      ]);
-      _totalCreditHours = 0;
-      _gpa = 0.0;
-    });
-  }
+  final GradeCalculatorLogic _logic = GradeCalculatorLogic();
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +48,7 @@ class _GradeCalculatorState extends State<GradeCalculator> {
                       ),
                     ],
                   ),
-                  ..._courses.map((course) {
+                  ..._logic.courses.map((course) {
                     return TableRow(
                       children: [
                         TableCell(
@@ -142,7 +69,7 @@ class _GradeCalculatorState extends State<GradeCalculator> {
                             child: DropdownButton<int>(
                               isExpanded: true,
                               value: course['creditHour'],
-                              items: List.generate(6, (index) {
+                              items: List.generate(10, (index) {
                                 return DropdownMenuItem(
                                   value: index + 1,
                                   child: Text('${index + 1}'),
@@ -163,18 +90,7 @@ class _GradeCalculatorState extends State<GradeCalculator> {
                             child: DropdownButton<String>(
                               isExpanded: true,
                               value: course['grade'],
-                              items: [
-                                'A+',
-                                'A',
-                                'A-',
-                                'B+',
-                                'B',
-                                'B-',
-                                'C+',
-                                'C',
-                                'D',
-                                'F'
-                              ].map((grade) {
+                              items: ['A', 'B', 'C', 'D', 'F'].map((grade) {
                                 return DropdownMenuItem(
                                   value: grade,
                                   child: Text(grade),
@@ -199,15 +115,27 @@ class _GradeCalculatorState extends State<GradeCalculator> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
-                    onPressed: _addCourse,
+                    onPressed: () {
+                      setState(() {
+                        _logic.addCourse();
+                      });
+                    },
                     child: const Text('Add'),
                   ),
                   ElevatedButton(
-                    onPressed: _calculateGPA,
+                    onPressed: () {
+                      setState(() {
+                        _logic.calculateGPA();
+                      });
+                    },
                     child: const Text('Calculate'),
                   ),
                   ElevatedButton(
-                    onPressed: _resetFields,
+                    onPressed: () {
+                      setState(() {
+                        _logic.resetFields();
+                      });
+                    },
                     child: const Text('Reset'),
                   ),
                 ],
@@ -217,7 +145,7 @@ class _GradeCalculatorState extends State<GradeCalculator> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Total Credit Hours:'),
-                  Text('$_totalCreditHours'),
+                  Text('${_logic.totalCreditHours}'),
                 ],
               ),
               const SizedBox(height: 10),
@@ -225,7 +153,7 @@ class _GradeCalculatorState extends State<GradeCalculator> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('GPA:'),
-                  Text(_gpa.toStringAsFixed(2)),
+                  Text(_logic.gpa.toStringAsFixed(2)),
                 ],
               ),
             ],
