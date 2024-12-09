@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nex_planner/services/grade_calc_service.dart';
+import 'package:nex_planner/services/grade_calculator.dart';
 
 class GradeCalculator extends StatefulWidget {
   const GradeCalculator({Key? key}) : super(key: key);

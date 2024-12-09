@@ -12,6 +12,7 @@ class AddSchedulePage extends StatefulWidget {
 class _AddSchedulePageState extends State<AddSchedulePage> {
   final TextEditingController _courseController = TextEditingController();
   final TextEditingController _roomController = TextEditingController();
+
   TimeOfDay? _selectedTime;
 
   Future<void> _selectTime(BuildContext context) async {
@@ -26,28 +27,24 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
     }
   }
 
+  void _addClassSchedule() {
+    if (_courseController.text.isNotEmpty &&
+        _roomController.text.isNotEmpty &&
+        _selectedTime != null) {
+      widget.onAddSchedule(
+        _selectedTime!.format(context),
+        _courseController.text,
+        _roomController.text,
+      );
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Schedule'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: () {
-              if (_selectedTime != null &&
-                  _courseController.text.isNotEmpty &&
-                  _roomController.text.isNotEmpty) {
-                widget.onAddSchedule(
-                  _selectedTime!.format(context),
-                  _courseController.text,
-                  _roomController.text,
-                );
-                Navigator.pop(context);
-              }
-            },
-          ),
-        ],
+        title: const Text('Add Class Schedule'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -56,7 +53,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
             TextField(
               controller: _courseController,
               decoration: const InputDecoration(
-                labelText: 'Course Name',
+                labelText: 'Course',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -83,6 +80,11 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                   onPressed: () => _selectTime(context),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _addClassSchedule,
+              child: const Text('Add Class'),
             ),
           ],
         ),

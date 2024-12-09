@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nex_planner/pages/Category/Tools/DailyReminder/reminder_modal.dart';
+import 'package:nex_planner/services/local_storage.dart';
 
 class DailyReminder extends StatefulWidget {
   const DailyReminder({super.key});
@@ -10,11 +11,26 @@ class DailyReminder extends StatefulWidget {
 
 class _DailyReminderState extends State<DailyReminder> {
   final List<Map<String, dynamic>> _reminders = [];
+  final LocalStorageService _localStorageService = LocalStorageService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReminders();
+  }
+
+  Future<void> _loadReminders() async {
+    final reminders = await _localStorageService.loadReminders();
+    setState(() {
+      _reminders.addAll(reminders);
+    });
+  }
 
   void _addReminder(Map<String, dynamic> reminder) {
     setState(() {
       _reminders.add(reminder);
     });
+    _localStorageService.saveReminders(_reminders);
   }
 
   @override
