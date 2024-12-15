@@ -35,10 +35,10 @@ class GradeCalculatorLogic {
   }
 
   void resetFields() {
-    for (var course in _courses) {
-      course['course'].clear();
-      course['creditHour'] = null;
-      course['grade'] = null;
+    _courses.clear();
+    for (int i = 0; i < 3; i++) {
+      _courses.add(
+          {'course': TextEditingController(), 'creditHour': null, 'grade': null});
     }
     _totalCreditHours = 0;
     _gpa = 0.0;

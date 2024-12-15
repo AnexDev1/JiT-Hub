@@ -5,16 +5,16 @@ class Departments extends StatelessWidget {
   final Map<String, String> departmentImages = {
     'Faculty of Civil and Environmental Engineering': 'lib/assets/civil.jpg',
     'Faculty of Materials Science and Engineering': 'lib/assets/material.jpg',
-    'Faculty of Electrical and Computer Engineering':
-        'lib/assets/electrical.jpg',
+    'Faculty of Electrical and Computer Engineering': 'lib/assets/electrical.jpg',
     'Faculty of Mechanical Engineering': 'lib/assets/mechanical.jpg',
     'Faculty of Computing and Informatics': 'lib/assets/informatics.jpg',
     'School of Biomedical Engineering': 'lib/assets/biomedical.jpg',
     'School of Chemical Engineering': 'lib/assets/chemical.jpg',
-    'Aviation Science and Aerospace Engineering Academy':
-        'lib/assets/aviation.jpg',
+    'Aviation Science and Aerospace Engineering Academy': 'lib/assets/aviation.jpg',
     'Freshman and Non-Institute Courses': 'lib/assets/freshman.jpg',
   };
+
+   Departments({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,23 +41,30 @@ class Departments extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (context) => DepartmentDetailScreen(
                       departmentName: department,
-                      departmentDetail: departmentDetails[department] ??
-                          'Details not available',
+                      departmentDetail: departmentDetails[department] ?? 'Details not available',
+                      imagePath: departmentImages[department] ?? 'lib/assets/placeholder.jpg',
                     ),
                   ),
                 );
               },
               child: Container(
                 decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(departmentImages[department] ??
-                        'lib/assets/placeholder.jpg'),
-                    fit: BoxFit.cover,
-                  ),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Stack(
                   children: [
+                    Hero(
+                      tag: department,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage(departmentImages[department] ?? 'lib/assets/placeholder.jpg'),
+                            fit: BoxFit.cover,
+                          ),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                    ),
                     Center(
                       child: Container(
                         color: Colors.black54,
@@ -72,14 +79,12 @@ class Departments extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (department ==
-                        'Aviation Science and Aerospace Engineering Academy')
+                    if (department == 'Aviation Science and Aerospace Engineering Academy')
                       Positioned(
                         right: 8,
                         top: 8,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.red,
                             borderRadius: BorderRadius.circular(4),
@@ -107,12 +112,14 @@ class Departments extends StatelessWidget {
 class DepartmentDetailScreen extends StatelessWidget {
   final String departmentName;
   final String departmentDetail;
+  final String imagePath;
 
   const DepartmentDetailScreen({
-    Key? key,
+    super.key,
     required this.departmentName,
     required this.departmentDetail,
-  }) : super(key: key);
+    required this.imagePath,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -123,18 +130,22 @@ class DepartmentDetailScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: Text(
-            departmentDetail,
-            style: const TextStyle(fontSize: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Hero(
+                tag: departmentName,
+                child: Image.asset(imagePath),
+              ),
+              const SizedBox(height: 16.0),
+              Text(
+                departmentDetail,
+                style: const TextStyle(fontSize: 16.0),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: Departments(),
-  ));
 }
