@@ -1,31 +1,30 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'class_schedule_model.dart';
+part of 'schedule.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class ClassScheduleModelAdapter extends TypeAdapter<ClassScheduleModel> {
+class ScheduleAdapter extends TypeAdapter<Schedule> {
   @override
   final int typeId = 1;
 
   @override
-  ClassScheduleModel read(BinaryReader reader) {
+  Schedule read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return ClassScheduleModel(
-      day: fields[0] as String,
-      time: fields[1] as String,
-      course: fields[2] as String,
-      room: fields[3] as String,
-    );
+    return Schedule()
+      ..day = fields[0] as String
+      ..time = fields[1] as String
+      ..course = fields[2] as String
+      ..room = fields[3] as String;
   }
 
   @override
-  void write(BinaryWriter writer, ClassScheduleModel obj) {
+  void write(BinaryWriter writer, Schedule obj) {
     writer
       ..writeByte(4)
       ..writeByte(0)
@@ -44,7 +43,7 @@ class ClassScheduleModelAdapter extends TypeAdapter<ClassScheduleModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ClassScheduleModelAdapter &&
+      other is ScheduleAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

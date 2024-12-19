@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../model/schedule.dart';
+import '../../../../provider/classSchedule_provider.dart';
 import 'add_schedule.dart';
 
 class ClassSchedule extends StatefulWidget {
@@ -8,17 +11,8 @@ class ClassSchedule extends StatefulWidget {
   _ClassScheduleState createState() => _ClassScheduleState();
 }
 
-class _ClassScheduleState extends State<ClassSchedule>
-    with SingleTickerProviderStateMixin {
+class _ClassScheduleState extends State<ClassSchedule> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final Map<String, List<Map<String, String>>> _schedules = {
-    'Monday': [],
-    'Tuesday': [],
-    'Wednesday': [],
-    'Thursday': [],
-    'Friday': [],
-    'Saturday': [],
-  };
 
   @override
   void initState() {
@@ -30,18 +24,6 @@ class _ClassScheduleState extends State<ClassSchedule>
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  void _addSchedule(String day, String time, String course, String room) {
-    setState(() {
-      _schedules[day]!.add({'time': time, 'course': course, 'room': room});
-    });
-  }
-
-  void _deleteSchedule(String day, int index) {
-    setState(() {
-      _schedules[day]!.removeAt(index);
-    });
   }
 
   @override
@@ -69,27 +51,30 @@ class _ClassScheduleState extends State<ClassSchedule>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: _schedules.keys.map((day) {
-                final schedules = _schedules[day]!;
-                return schedules.isEmpty
-                    ? const Center(child: Text('No Schedule'))
-                    : ListView.builder(
-                        itemCount: schedules.length,
-                        itemBuilder: (context, index) {
-                          final schedule = schedules[index];
-                          return ListTile(
-                            title: Text(
-                                '${schedule['course']} (${schedule['time']})'),
-                            subtitle: Text('Room: ${schedule['room']}'),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                _deleteSchedule(day, index);
-                              },
-                            ),
-                          );
-                        },
-                      );
+              children: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) {
+                return Consumer<ClassScheduleProvider>(
+                  builder: (context, provider, child) {
+                    final schedules = provider.getSchedules(day);
+                    return schedules.isEmpty
+                        ? const Center(child: Text('No Schedule'))
+                        : ListView.builder(
+                      itemCount: schedules.length,
+                      itemBuilder: (context, index) {
+                        final schedule = schedules[index];
+                        return ListTile(
+                          title: Text('${schedule.course} (${schedule.time})'),
+                          subtitle: Text('Room: ${schedule.room}'),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              provider.deleteSchedule(schedule);
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
               }).toList(),
             ),
           ),
@@ -97,13 +82,18 @@ class _ClassScheduleState extends State<ClassSchedule>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          final currentDay = _schedules.keys.elementAt(_tabController.index);
+          final currentDay = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][_tabController.index];
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => AddSchedulePage(
                 onAddSchedule: (time, course, room) {
-                  _addSchedule(currentDay, time, course, room);
+                  final schedule = Schedule()
+                    ..day = currentDay
+                    ..time = time
+                    ..course = course
+                    ..room = room;
+                  Provider.of<ClassScheduleProvider>(context, listen: false).addSchedule(schedule);
                 },
               ),
             ),
