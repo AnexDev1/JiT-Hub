@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:nex_planner/model/reminder.dart';
+
+import '../../../../provider/reminder_provider.dart';
 
 class ReminderModal extends StatefulWidget {
   final Function onAddReminder;
   final Function onAddReminderCallback;
 
-  ReminderModal(
-      {required this.onAddReminder, required this.onAddReminderCallback});
+  const ReminderModal({
+    super.key,
+    required this.onAddReminder,
+    required this.onAddReminderCallback,
+  });
 
   @override
   _ReminderModalState createState() => _ReminderModalState();
@@ -93,15 +100,23 @@ class _ReminderModalState extends State<ReminderModal> {
               if (_noteController.text.isNotEmpty &&
                   _selectedDate != null &&
                   _selectedTime != null) {
-                widget.onAddReminder({
-                  'note': _noteController.text,
-                  'date': _selectedDate!.toLocal().toString().split(' ')[0],
-                  'time': _selectedTime!.format(context),
-                  'remindMe': _remindMe,
-                  'category': _selectedCategory,
-                });
+                final newReminder = Reminder(
+                  title: _noteController.text,
+                  date: DateTime(
+                    _selectedDate!.year,
+                    _selectedDate!.month,
+                    _selectedDate!.day,
+                    _selectedTime!.hour,
+                    _selectedTime!.minute,
+                  ),
+                  category: _selectedCategory ?? 'Uncategorized',
+                  remindMe: _remindMe,
+                );
+                final reminderProvider = Provider.of<ReminderProvider>(context, listen: false);
+                reminderProvider.addReminder(newReminder);
+                widget.onAddReminder();
+                widget.onAddReminderCallback();
                 Navigator.pop(context);
-                // widget.onAddReminderCallback(); // Call the callback function
               }
             },
             child: const Text('Add'),

@@ -25,10 +25,10 @@ class CategoryDetailScreen extends StatelessWidget {
   Widget _buildContent() {
     final Map<String, Widget> categoryWidgets = {
       'Departments': Departments(),
-      'About JIT': AboutJit(),
+      'About JIT': const AboutJit(),
       'Grade Calculator': const GradeCalculator(),
       'Class Schedule': const ClassSchedule(),
-      'Daily Reminder': DailyReminder(),
+      'Daily Reminder': const DailyReminder(),
       'Note Saver': const NoteSaver(),
     };
 

@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:nex_planner/model/reminder.dart';
 import 'package:nex_planner/pages/HomePage/home_page.dart';
+import 'package:nex_planner/provider/reminder_provider.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  await Hive.initFlutter();
+  Hive.registerAdapter(ReminderAdapter());
+  await Hive.openBox<Reminder>('remindersBox');
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ReminderProvider()..loadReminders(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

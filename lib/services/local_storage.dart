@@ -1,40 +1,33 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
+import 'package:nex_planner/model/reminder.dart';
 
 class LocalStorageService {
-  static const String _remindersKey = 'reminders';
-  static const String _classScheduleKey = 'class_schedule';
+  static const String _remindersBox = 'remindersBox';
+  static const String _classScheduleBox = 'classScheduleBox';
 
-  Future<void> saveReminders(List<Map<String, dynamic>> reminders) async {
-    final prefs = await SharedPreferences.getInstance();
-    final remindersJson = jsonEncode(reminders);
-    await prefs.setString(_remindersKey, remindersJson);
-  }
-
-  Future<List<Map<String, dynamic>>> loadReminders() async {
-    final prefs = await SharedPreferences.getInstance();
-    final remindersJson = prefs.getString(_remindersKey);
-    if (remindersJson != null) {
-      final List<dynamic> remindersList = jsonDecode(remindersJson);
-      return remindersList.map((e) => e as Map<String, dynamic>).toList();
+  Future<void> saveReminders(List<Reminder> reminders) async {
+    final box = await Hive.openBox<Reminder>(_remindersBox);
+    await box.clear();
+    for (var reminder in reminders) {
+      await box.add(reminder);
     }
-    return [];
   }
 
-  Future<void> saveClassSchedule(
-      List<Map<String, dynamic>> classSchedule) async {
-    final prefs = await SharedPreferences.getInstance();
-    final classScheduleJson = jsonEncode(classSchedule);
-    await prefs.setString(_classScheduleKey, classScheduleJson);
+  Future<List<Reminder>> loadReminders() async {
+    final box = await Hive.openBox<Reminder>(_remindersBox);
+    return box.values.toList();
+  }
+
+  Future<void> saveClassSchedule(List<Map<String, dynamic>> classSchedule) async {
+    final box = await Hive.openBox<Map<String, dynamic>>(_classScheduleBox);
+    await box.clear();
+    for (var schedule in classSchedule) {
+      await box.add(schedule);
+    }
   }
 
   Future<List<Map<String, dynamic>>> loadClassSchedule() async {
-    final prefs = await SharedPreferences.getInstance();
-    final classScheduleJson = prefs.getString(_classScheduleKey);
-    if (classScheduleJson != null) {
-      final List<dynamic> classScheduleList = jsonDecode(classScheduleJson);
-      return classScheduleList.map((e) => e as Map<String, dynamic>).toList();
-    }
-    return [];
+    final box = await Hive.openBox<Map<String, dynamic>>(_classScheduleBox);
+    return box.values.toList();
   }
 }

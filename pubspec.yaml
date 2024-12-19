@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
   flutter:
     sdk: flutter
 
@@ -36,10 +38,13 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.16
   convex_bottom_bar: ^3.2.0
-  shared_preferences: ^2.3.3
+  shared_preferences: ^2.3.4
   intl: ^0.20.1
+  provider: ^6.1.2
 
 dev_dependencies:
+  hive_generator: ^1.0.0
+  build_runner: ^2.0.0
   flutter_test:
     sdk: flutter
 

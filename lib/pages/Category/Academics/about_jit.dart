@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AboutJit extends StatelessWidget {
+  const AboutJit({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +59,7 @@ class AboutJit extends StatelessWidget {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: AboutJit(),
   ));
 }
