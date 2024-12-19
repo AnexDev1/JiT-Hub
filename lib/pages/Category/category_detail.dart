@@ -2,7 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:nex_planner/pages/Category/Academics/about_jit.dart';
-import 'package:nex_planner/pages/Category/Academics/departments/departments.dart';
+import 'package:nex_planner/pages/Category/Academics/departments.dart';
+import 'Academics/calendar/academic_calendar.dart';
 import 'Tools/grade_calculator.dart';
 import 'Tools/ClassSchedule/class_schedule.dart';
 import 'Tools/DailyReminder/daily_reminder.dart';
@@ -26,6 +27,7 @@ class CategoryDetailScreen extends StatelessWidget {
     final Map<String, Widget> categoryWidgets = {
       'Departments': Departments(),
       'About JIT': const AboutJit(),
+      'Academic Calendar': const AcademicCalendar(),
       'Grade Calculator': const GradeCalculator(),
       'Class Schedule': const ClassSchedule(),
       'Daily Reminder': const DailyReminder(),
