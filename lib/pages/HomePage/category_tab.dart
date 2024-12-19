@@ -1,10 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:nex_planner/pages/Category/category_detail.dart';
 
-class CategoryTab extends StatelessWidget {
+class CategoryTab extends StatefulWidget {
   final List<Item> items;
 
   const CategoryTab({super.key, required this.items});
+
+  @override
+  _CategoryTabState createState() => _CategoryTabState();
+}
+
+class _CategoryTabState extends State<CategoryTab> {
+  late List<Item> items;
+
+  @override
+  void initState() {
+    super.initState();
+    items = List.from(widget.items);
+  }
+
+  void _pinToTop(int index) {
+    setState(() {
+      final item = items.removeAt(index);
+      items.insert(0, item);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +67,7 @@ class CategoryTab extends StatelessWidget {
                         ),
                       );
                     } else if (value == 'pin') {
-                      // Handle pin to top logic
+                      _pinToTop(index);
                     }
                   },
                   itemBuilder: (BuildContext context) {
