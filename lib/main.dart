@@ -33,7 +33,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        fontFamily: 'Poppins',
+        fontFamily: 'Jost',
+
       ),
       title: 'Flutter Demo',
       home: const HomePage(),

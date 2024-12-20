@@ -61,6 +61,16 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  fonts:
+    - family: jost
+      fonts:
+        - asset: lib/fonts/Jost-Regular.ttf
+        - asset: lib/fonts/Jost-Bold.ttf
+          weight: 700
+        - asset: lib/fonts/Jost-Medium.ttf
+          weight: 500
+        - asset: lib/fonts/Jost-Light.ttf
+          weight: 300
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

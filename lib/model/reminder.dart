@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 part 'reminder.g.dart';
@@ -10,7 +9,6 @@ class Reminder extends HiveObject {
 
   @HiveField(1)
   DateTime date;
-
 
   @HiveField(3)
   String category;
