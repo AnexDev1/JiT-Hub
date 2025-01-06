@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'study_ai.dart';
 
 class NoteSaver extends StatefulWidget {
   const NoteSaver({super.key});
@@ -94,7 +95,7 @@ class _NoteSaverState extends State<NoteSaver> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16.0),
+                  const SizedBox(height: 10.0),
                   ElevatedButton(
                     onPressed: _saveNote,
                     child: Text(_editingIndex == null ? 'Save Note' : 'Update Note'),
@@ -139,6 +140,16 @@ class _NoteSaverState extends State<NoteSaver> {
                   );
                 },
               ),
+            ),
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const StudyAI()),
+                );
+              },
+              child: const Text('Study AI'),
             ),
           ],
         ),
