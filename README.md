@@ -25,7 +25,7 @@ Nex Planner is a simple mobile app designed to help you track all college-relate
     ```bash
 
 GEMINI_API_KEY=your_api_key_here 
-    ```
+
 4. **Run the app:**
 
 ## Usage
