@@ -22,8 +22,8 @@ Nex Planner is a simple mobile app designed to help you track all college-relate
 2. **Install dependencies:**
 3. **Set up the environment:**
     - Create a `.env` file in the root directory and add your API key:
-    ```bash
 
+  ```bash
 GEMINI_API_KEY=your_api_key_here 
 
 4. **Run the app:**
