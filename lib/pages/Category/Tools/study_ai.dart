@@ -126,12 +126,12 @@ class _StudyAIState extends State<StudyAI> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.send),
+                          onPressed: _submitInput,
+                        ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: _submitInput,
                   ),
                   IconButton(
                     icon: const Icon(Icons.image),

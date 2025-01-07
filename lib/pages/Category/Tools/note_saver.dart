@@ -96,9 +96,37 @@ class _NoteSaverState extends State<NoteSaver> {
                     },
                   ),
                   const SizedBox(height: 10.0),
-                  ElevatedButton(
-                    onPressed: _saveNote,
-                    child: Text(_editingIndex == null ? 'Save Note' : 'Update Note'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _saveNote,
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white, backgroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        ),
+                        child: Text(_editingIndex == null ? 'Save Note' : 'Update Note'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const StudyAI()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white, backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        ),
+                        child: const Text('Study AI'),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -140,16 +168,6 @@ class _NoteSaverState extends State<NoteSaver> {
                   );
                 },
               ),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const StudyAI()),
-                );
-              },
-              child: const Text('Study AI'),
             ),
           ],
         ),
