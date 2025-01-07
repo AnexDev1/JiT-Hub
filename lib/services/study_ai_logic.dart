@@ -17,7 +17,6 @@ class StudyAILogic {
   List<String> get questions => _questions;
   bool get isLoading => _isLoading;
 
-
   set isLoading(bool value) {
     _isLoading = value;
   }
@@ -42,7 +41,7 @@ class StudyAILogic {
     textRecognizer.close();
   }
 
-  Future<void> createQuestionsFromText(String prompt) async {
+  Future<void> _sendRequestToAI(String prompt) async {
     _isLoading = true;
 
     String url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${Config.apiKey}';
@@ -69,14 +68,22 @@ class StudyAILogic {
 
       _questions = content
           .split('\n')
-          .where((line) => line.trim().isNotEmpty && !line.startsWith('**'))
+          .where((line) => line.trim().isNotEmpty)
           .toList();
     } else {
-      print('Failed to generate questions: ${response.statusCode}');
+      print('Failed to communicate with AI: ${response.statusCode}');
       print('Response body: ${response.body}');
     }
 
     _isLoading = false;
+  }
+
+  Future<void> createQuestionsFromText(String prompt) async {
+    await _sendRequestToAI(prompt);
+  }
+
+  Future<void> chatWithAI(String prompt) async {
+    await _sendRequestToAI(prompt);
   }
 
   void clearQuestions() {

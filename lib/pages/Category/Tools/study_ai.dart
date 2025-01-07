@@ -23,7 +23,7 @@ class _StudyAIState extends State<StudyAI> {
       if (_isImageInput) {
         await _logic.createQuestionsFromText('generate exam like question from this text, could include choice , or even blanc space questions: $inputText');
       } else {
-        await _logic.createQuestionsFromText(inputText);
+        await _logic.chatWithAI(inputText);
       }
       setState(() {
         _inputController.clear();
