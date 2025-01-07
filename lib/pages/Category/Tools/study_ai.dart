@@ -49,82 +49,104 @@ class _StudyAIState extends State<StudyAI> {
               // Implement other options later
             },
             itemBuilder: (BuildContext context) {
-              return {'Clear', 'Save', 'Share'}.map((String choice) {
-                return PopupMenuItem<String>(
-                  value: choice,
-                  child: Text(choice),
-                );
-              }).toList();
+              return [
+                const PopupMenuItem<String>(
+                  value: 'Clear',
+                  child: ListTile(
+                    leading: Icon(Icons.clear),
+                    title: Text('Clear'),
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Save',
+                  child: ListTile(
+                    leading: Icon(Icons.save),
+                    title: Text('Save'),
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Share',
+                  child: ListTile(
+                    leading: Icon(Icons.share),
+                    title: Text('Share'),
+                  ),
+                ),
+              ];
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: _logic.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _logic.questions.isNotEmpty
-                ? Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SingleChildScrollView(
-                child: _isImageInput
-                    ? Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: MarkdownBody(
-                      data: _logic.questions.join('\n\n'),
-                      styleSheet: MarkdownStyleSheet(
-                        p: const TextStyle(fontSize: 16.0),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: _logic.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _logic.questions.isNotEmpty
+                  ? Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SingleChildScrollView(
+                  child: _isImageInput
+                      ? Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: MarkdownBody(
+                        data: _logic.questions.join('\n\n'),
+                        styleSheet: MarkdownStyleSheet(
+                          p: const TextStyle(fontSize: 16.0),
+                        ),
                       ),
                     ),
-                  ),
-                )
-                    : MarkdownBody(
-                  data: _logic.questions.join('\n\n'),
-                  styleSheet: MarkdownStyleSheet(
-                    p: const TextStyle(fontSize: 16.0),
-                  ),
-                ),
-              ),
-            )
-                : const SizedBox.shrink(),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _inputController,
-                    decoration: InputDecoration(
-                      hintText: 'Type a message',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+                  )
+                      : MarkdownBody(
+                    data: _logic.questions.join('\n\n'),
+                    styleSheet: MarkdownStyleSheet(
+                      p: const TextStyle(fontSize: 16.0),
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _submitInput,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.image),
-                  onPressed: () async {
-                    await _logic.pickImage();
-                    setState(() {
-                      _isImageInput = true;
-                    });
-                  },
-                ),
-              ],
+              )
+                  : const SizedBox.shrink(),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _inputController,
+                      decoration: InputDecoration(
+                        hintText: 'Type a message',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _submitInput,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.image),
+                    onPressed: () async {
+                      await _logic.pickImage();
+                      setState(() {
+                        _isImageInput = true;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
