@@ -9,21 +9,16 @@ import 'package:flutter_gemini/flutter_gemini.dart';
 class StudyAILogic {
   File? _image;
   final List<String> _questions = [];
-  bool _isLoading = false;
+  bool isLoading = false;
   final List<String> _responses = [];
   String _extractedText = '';
-  StreamController<String> _streamController = StreamController<String>.broadcast();
+  final StreamController<String> _streamController = StreamController<String>.broadcast();
 
   File? get image => _image;
   List<String> get questions => _questions;
-  bool get isLoading => _isLoading;
   List<String> get responses => _responses;
   String get extractedText => _extractedText;
   Stream<String> get responseStream => _streamController.stream;
-
-  set isLoading(bool value) {
-    _isLoading = value;
-  }
 
   Future<void> pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -47,7 +42,7 @@ class StudyAILogic {
   }
 
   Future<void> _sendRequestToAI(String prompt) async {
-    _isLoading = true;
+    isLoading = true;
 
     Gemini.instance.promptStream(parts: [
       Part.text(prompt)
@@ -57,7 +52,7 @@ class StudyAILogic {
       _streamController.add(output);
     });
 
-    _isLoading = false;
+    isLoading = false;
   }
 
   Future<void> createQuestionsFromText(String prompt) async {

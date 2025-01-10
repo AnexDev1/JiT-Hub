@@ -30,8 +30,13 @@ class _StudyAIState extends State<StudyAI> {
     }
   }
 
-  void _pickImage() async {
+  void _pickImage(String action) async {
     await _logic.pickImage();
+    if (action == 'Create Questions') {
+      await _logic.createQuestionsFromText('generate exam like question from this text, could include choice, short answer or even blank space questions: ${_logic.extractedText}');
+    } else if (action == 'Answer Questions') {
+      await _logic.chatWithAI('Give the correct answer for this questions, write question followed by answer, style the codes with markdown: ${_logic.extractedText}');
+    }
     setState(() {
       // Update the UI after picking the image and performing OCR
     });
@@ -148,9 +153,23 @@ class _StudyAIState extends State<StudyAI> {
                       ),
                     ),
                   ),
-                  IconButton(
+                  PopupMenuButton<String>(
                     icon: const Icon(Icons.image),
-                    onPressed: _pickImage,
+                    onSelected: (String value) {
+                      _pickImage(value);
+                    },
+                    itemBuilder: (BuildContext context) {
+                      return [
+                        const PopupMenuItem<String>(
+                          value: 'Create Questions',
+                          child: Text('Create Questions'),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'Answer Questions',
+                          child: Text('Answer Questions'),
+                        ),
+                      ];
+                    },
                   ),
                 ],
               ),
