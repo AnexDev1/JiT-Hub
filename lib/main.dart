@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:nex_planner/config.dart';
 import 'package:nex_planner/model/reminder.dart';
 import 'package:nex_planner/model/schedule.dart';
 import 'package:nex_planner/pages/HomePage/home_page.dart';
@@ -15,6 +17,7 @@ void main() async {
   await Hive.openBox<Reminder>('remindersBox');
   await Hive.openBox<Schedule>('schedules');
   await dotenv.load(fileName: ".env");
+  Gemini.init(apiKey: Config.apiKey);
 
   runApp(
     MultiProvider(

@@ -12,25 +12,40 @@ class StudyAI extends StatefulWidget {
 class _StudyAIState extends State<StudyAI> {
   final StudyAILogic _logic = StudyAILogic();
   final TextEditingController _inputController = TextEditingController();
-  bool _isImageInput = false;
+  final ScrollController _scrollController = ScrollController();
 
   void _submitInput() async {
     String inputText = _inputController.text;
     if (inputText.isNotEmpty) {
       setState(() {
         _logic.isLoading = true;
+        _logic.clearResponses();
       });
-      if (_isImageInput) {
-        await _logic.createQuestionsFromText('generate exam like question from this text, could include choice , or even blanc space questions: $inputText');
-      } else {
-        await _logic.chatWithAI(inputText);
-      }
+      await _logic.chatWithAI(inputText);
       setState(() {
         _inputController.clear();
-        _isImageInput = false;
         _logic.isLoading = false;
       });
+      _scrollToEnd();
     }
+  }
+
+  void _pickImage() async {
+    await _logic.pickImage();
+    setState(() {
+      // Update the UI after picking the image and performing OCR
+    });
+    _scrollToEnd();
+  }
+
+  void _scrollToEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   @override
@@ -44,9 +59,9 @@ class _StudyAIState extends State<StudyAI> {
               if (value == 'Clear') {
                 setState(() {
                   _logic.clearQuestions();
+                  _logic.clearResponses();
                 });
               }
-              // Implement other options later
             },
             itemBuilder: (BuildContext context) {
               return [
@@ -85,34 +100,34 @@ class _StudyAIState extends State<StudyAI> {
             Expanded(
               child: _logic.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : _logic.questions.isNotEmpty
-                  ? Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SingleChildScrollView(
-                  child: _isImageInput
-                      ? Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Padding(
+                  : StreamBuilder<String>(
+                stream: _logic.responseStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return const Center(child: Text('Error occurred'));
+                  } else {
+                    return Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: MarkdownBody(
-                        data: _logic.questions.join('\n\n'),
-                        styleSheet: MarkdownStyleSheet(
-                          p: const TextStyle(fontSize: 16.0),
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: _logic.responses.map((response) {
+                            return MarkdownBody(
+                              data: response,
+                              styleSheet: MarkdownStyleSheet(
+                                p: const TextStyle(fontSize: 16.0),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ),
-                    ),
-                  )
-                      : MarkdownBody(
-                    data: _logic.questions.join('\n\n'),
-                    styleSheet: MarkdownStyleSheet(
-                      p: const TextStyle(fontSize: 16.0),
-                    ),
-                  ),
-                ),
-              )
-                  : const SizedBox.shrink(),
+                    );
+                  }
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -135,12 +150,7 @@ class _StudyAIState extends State<StudyAI> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.image),
-                    onPressed: () async {
-                      await _logic.pickImage();
-                      setState(() {
-                        _isImageInput = true;
-                      });
-                    },
+                    onPressed: _pickImage,
                   ),
                 ],
               ),
