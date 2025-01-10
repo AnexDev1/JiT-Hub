@@ -94,6 +94,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         return [
           CategoryItem(
             icon: Icons.calculate,
+            title: 'Study AI',
+            description: 'AI tool that could be used for study purpose.',
+          ),
+          CategoryItem(
+            icon: Icons.calculate,
             title: 'Grade Calculator',
             description: 'Academic year result grade calculator.',
           ),

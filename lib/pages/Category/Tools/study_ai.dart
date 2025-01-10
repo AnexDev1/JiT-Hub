@@ -108,10 +108,14 @@ class _StudyAIState extends State<StudyAI> {
                   : StreamBuilder<String>(
                 stream: _logic.responseStream,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+                  if (_logic.isLoading) {
                     return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: Text(''));
                   } else if (snapshot.hasError) {
                     return const Center(child: Text('Error occurred'));
+                  } else if (!snapshot.hasData || _logic.responses.isEmpty) {
+                    return const Center(child: Text('No responses yet'));
                   } else {
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -132,7 +136,7 @@ class _StudyAIState extends State<StudyAI> {
                     );
                   }
                 },
-              ),
+              )
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),

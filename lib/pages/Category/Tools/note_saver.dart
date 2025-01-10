@@ -110,22 +110,7 @@ class _NoteSaverState extends State<NoteSaver> {
                         ),
                         child: Text(_editingIndex == null ? 'Save Note' : 'Update Note'),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const StudyAI()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white, backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        ),
-                        child: const Text('Study AI'),
-                      ),
+
                     ],
                   ),
                 ],
