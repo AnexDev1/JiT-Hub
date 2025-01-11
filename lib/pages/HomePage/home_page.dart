@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:nex_planner/pages/HomePage/gradient_container.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Category/category_detail.dart';
 import 'category_tab.dart';
@@ -15,6 +16,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late TabController _tabController;
   late TabController _bottomNavController;
+  late String _userName ;
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   List<CategoryItem> _searchResults = [];
@@ -24,8 +26,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _bottomNavController = TabController(length: 4, vsync: this);
+    _loadUserName();
   }
-
+Future<void>    _loadUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userName = prefs.getString('userName')?? 'User';
+    setState(() {
+      _userName = userName;
+    });
+    }
   void _startSearch() {
     setState(() {
       _isSearching = true;
@@ -102,11 +111,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             title: 'Grade Calculator',
             description: 'Academic year result grade calculator.',
           ),
-          CategoryItem(
-            icon: Icons.grading_rounded,
-            title: 'Google',
-            description: 'Inline google to use it while inside the app',
-          ),
+          // CategoryItem(
+          //   icon: Icons.grading_rounded,
+          //   title: 'Google',
+          //   description: 'Inline google to use it while inside the app',
+          // ),
           CategoryItem(
             icon: Icons.calendar_month,
             title: 'Class Schedule',
@@ -225,14 +234,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                const Column(
+                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      'Hello Anwar',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      'Hello $_userName',
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
-                    Text(
+                    const Text(
                       'how is your study',
                       style: TextStyle(fontSize: 16),
                     ),
