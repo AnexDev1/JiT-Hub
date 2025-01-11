@@ -103,6 +103,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             description: 'Academic year result grade calculator.',
           ),
           CategoryItem(
+            icon: Icons.grading_rounded,
+            title: 'Google',
+            description: 'Inline google to use it while inside the app',
+          ),
+          CategoryItem(
             icon: Icons.calendar_month,
             title: 'Class Schedule',
             description: 'Academic year result grade calculator.',
@@ -126,11 +131,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             title: 'Religious',
             description: 'Religious clubs in the campus',
           ),
-          CategoryItem(
-            icon: Icons.grading_rounded,
-            title: 'My Grade',
-            description: 'See your grade from the official website of the university',
-          ),
+
         ];
       default:
         return [];
