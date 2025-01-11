@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:nex_planner/pages/Category/Academics/about_jit.dart';
 import 'package:nex_planner/pages/Category/Academics/departments.dart';
 import 'package:nex_planner/pages/Category/Tools/study_ai.dart';
-import 'package:nex_planner/pages/Category/Campus_life/webview_page.dart';
 import 'Academics/calendar/academic_calendar.dart';
 import 'Tools/grade_calculator.dart';
 import 'Tools/ClassSchedule/class_schedule.dart';
@@ -33,7 +32,7 @@ class CategoryDetailScreen extends StatelessWidget {
       'Class Schedule': const ClassSchedule(),
       'Daily Reminder': const DailyReminder(),
       'Study AI': const StudyAI(),
-      'Google': const WebViewPage(url: 'https://google.com'),
+      // 'Google': const WebViewPage(url: 'https://google.com'),
     };
 
     return categoryWidgets[categoryName] ??

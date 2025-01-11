@@ -1,13 +1,13 @@
 const List<String> departments = [
-  'Faculty of Civil and Environmental Engineering',
-  'Faculty of Materials Science and Engineering',
-  'Faculty of Electrical and Computer Engineering',
-  'Faculty of Mechanical Engineering',
-  'Faculty of Computing and Informatics',
-  'School of Biomedical Engineering',
-  'School of Chemical Engineering',
+  ' Civil and Environmental Engineering',
+  ' Materials Science and Engineering',
+  ' Electrical and Computer Engineering',
+  ' Mechanical Engineering',
+  ' Computing and Informatics',
+  'Biomedical Engineering',
+  'Chemical Engineering',
   'Aviation Science and Aerospace Engineering Academy',
-  'Freshman and Non-Institute Courses',
+  'Freshman ',
 ];
 
 const Map<String, String> departmentDetails = {
