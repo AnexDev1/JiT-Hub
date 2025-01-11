@@ -112,11 +112,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             title: 'Daily Reminder',
             description: 'Academic year result grade calculator.',
           ),
-          CategoryItem(
-            icon: Icons.note_add,
-            title: 'Note Saver',
-            description: 'Academic year result grade calculator.',
-          ),
+
         ];
       case 3:
         return [

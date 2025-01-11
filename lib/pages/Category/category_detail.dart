@@ -9,7 +9,6 @@ import 'Academics/calendar/academic_calendar.dart';
 import 'Tools/grade_calculator.dart';
 import 'Tools/ClassSchedule/class_schedule.dart';
 import 'Tools/DailyReminder/daily_reminder.dart';
-import 'Tools/note_saver.dart';
 
 class CategoryDetailScreen extends StatelessWidget {
   final String categoryName;
@@ -33,7 +32,6 @@ class CategoryDetailScreen extends StatelessWidget {
       'Grade Calculator': const GradeCalculator(),
       'Class Schedule': const ClassSchedule(),
       'Daily Reminder': const DailyReminder(),
-      'Note Saver': const NoteSaver(),
       'Study AI': const StudyAI()
       // 'My Grade': const WebViewPage()
     };
