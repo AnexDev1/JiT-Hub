@@ -3,11 +3,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nex_planner/data/department_data.dart';
 
 class UserFormPage extends StatefulWidget {
+  const UserFormPage({super.key});
+
   @override
-  _UserFormPageState createState() => _UserFormPageState();
+  UserFormPageState createState() => UserFormPageState();
 }
 
-class _UserFormPageState extends State<UserFormPage> {
+class UserFormPageState extends State<UserFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   String? _selectedDepartment;
@@ -19,6 +21,8 @@ class _UserFormPageState extends State<UserFormPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isFormFilled', true);
       await prefs.setString('userName', _nameController.text);
+      await prefs.setString('department', _selectedDepartment ?? 'Unknown');
+      await prefs.setString('year', _selectedAcademicYear ?? 'Unknown');
       Navigator.pushReplacementNamed(context, '/home');
     }
   }
@@ -36,8 +40,6 @@ class _UserFormPageState extends State<UserFormPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: Text('User Form'),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Padding(
@@ -68,14 +70,18 @@ class _UserFormPageState extends State<UserFormPage> {
               ElevatedButton(
                 onPressed: _currentStep < 2 ? _nextStep : _submitForm,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  textStyle: const TextStyle(fontSize: 18),
+                  backgroundColor: Colors.deepPurple,
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                    borderRadius: BorderRadius.circular(30.0),
                   ),
+                  elevation: 5,
                 ),
-                child: Text(_currentStep < 2 ? 'Next' : 'Submit', style: TextStyle(color: Colors.white)),
+                child: Text(
+                  _currentStep < 2 ? 'Next' : 'Submit',
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -96,10 +102,10 @@ class _UserFormPageState extends State<UserFormPage> {
             labelText: 'Name',
             labelStyle: const TextStyle(color: Colors.grey),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(30.0),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(30.0),
               borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
             ),
             filled: true,
@@ -129,10 +135,10 @@ class _UserFormPageState extends State<UserFormPage> {
             labelText: 'Department',
             labelStyle: const TextStyle(color: Colors.grey),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(30.0),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(30.0),
               borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
             ),
             filled: true,
@@ -143,7 +149,7 @@ class _UserFormPageState extends State<UserFormPage> {
               value: department,
               child: Text(
                 department,
-                style: TextStyle(color: Colors.black, fontSize: 16),
+                style: const TextStyle(color: Colors.black, fontSize: 16),
               ),
             );
           }).toList(),
@@ -176,10 +182,10 @@ class _UserFormPageState extends State<UserFormPage> {
             labelText: 'Academic Year',
             labelStyle: const TextStyle(color: Colors.grey),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(30.0),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(30.0),
               borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
             ),
             filled: true,
@@ -196,7 +202,7 @@ class _UserFormPageState extends State<UserFormPage> {
               value: year,
               child: Text(
                 year,
-                style: TextStyle(color: Colors.black, fontSize: 16),
+                style: const TextStyle(color: Colors.black, fontSize: 16),
               ),
             );
           }).toList(),

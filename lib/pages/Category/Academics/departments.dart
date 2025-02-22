@@ -3,13 +3,13 @@ import 'package:nex_planner/data/department_data.dart';
 
 class Departments extends StatelessWidget {
   final Map<String, String> departmentImages = {
-    'Faculty of Civil and Environmental Engineering': 'lib/assets/civil.jpg',
-    'Faculty of Materials Science and Engineering': 'lib/assets/material.jpg',
-    'Faculty of Electrical and Computer Engineering': 'lib/assets/electrical.jpg',
-    'Faculty of Mechanical Engineering': 'lib/assets/mechanical.jpg',
-    'Faculty of Computing and Informatics': 'lib/assets/informatics.jpg',
-    'School of Biomedical Engineering': 'lib/assets/biomedical.jpg',
-    'School of Chemical Engineering': 'lib/assets/chemical.jpg',
+    ' Civil and Environmental Engineering': 'lib/assets/civil.jpg',
+    'Material Science and Engineering': 'lib/assets/material.jpg',
+    ' Electrical and Computer Engineering': 'lib/assets/electrical.jpg',
+    ' Mechanical Engineering': 'lib/assets/mechanical.jpg',
+    'Computing and Informatics': 'lib/assets/computing.jpg',
+    'Biomedical Engineering': 'lib/assets/biomedical.jpg',
+    'Chemical Engineering': 'lib/assets/chemical.jpg',
     'Aviation Science and Aerospace Engineering Academy': 'lib/assets/aviation.jpg',
     'Freshman and Non-Institute Courses': 'lib/assets/freshman.jpg',
   };
@@ -34,6 +34,7 @@ class Departments extends StatelessWidget {
           itemCount: departments.length,
           itemBuilder: (context, index) {
             String department = departments[index];
+            print(departmentImages[department]);
             return GestureDetector(
               onTap: () {
                 Navigator.push(

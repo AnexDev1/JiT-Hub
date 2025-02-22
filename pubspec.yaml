@@ -97,7 +97,7 @@ flutter:
     - lib/assets/material.jpg
     - lib/assets/electrical.jpg
     - lib/assets/mechanical.jpg
-    - lib/assets/informatics.jpg
+    - lib/assets/computing.jpg
     - lib/assets/biomedical.jpg
     - lib/assets/chemical.jpg
     - lib/assets/aviation.jpg

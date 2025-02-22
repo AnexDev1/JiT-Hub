@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-// import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:nex_planner/pages/HomePage/gradient_container.dart';
+import 'package:nex_planner/pages/HomePage/AppDrawer/profile_page.dart';
+import 'package:nex_planner/pages/HomePage/AppDrawer/settings_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Category/category_detail.dart';
+import 'AppDrawer/app_drawer.dart';
 import 'category_tab.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,7 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late TabController _tabController;
   late TabController _bottomNavController;
-  late String _userName ;
+  late String _userName;
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   List<CategoryItem> _searchResults = [];
@@ -28,13 +30,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _bottomNavController = TabController(length: 4, vsync: this);
     _loadUserName();
   }
-Future<void>    _loadUserName() async {
+
+  Future<void> _loadUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userName = prefs.getString('userName')?? 'User';
+    String? userName = prefs.getString('userName') ?? 'User';
     setState(() {
       _userName = userName;
     });
-    }
+  }
+
   void _startSearch() {
     setState(() {
       _isSearching = true;
@@ -111,11 +115,6 @@ Future<void>    _loadUserName() async {
             title: 'Grade Calculator',
             description: 'Academic year result grade calculator.',
           ),
-          // CategoryItem(
-          //   icon: Icons.grading_rounded,
-          //   title: 'Google',
-          //   description: 'Inline google to use it while inside the app',
-          // ),
           CategoryItem(
             icon: Icons.calendar_month,
             title: 'Class Schedule',
@@ -126,7 +125,6 @@ Future<void>    _loadUserName() async {
             title: 'Daily Reminder',
             description: 'Academic year result grade calculator.',
           ),
-
         ];
       case 3:
         return [
@@ -140,7 +138,6 @@ Future<void>    _loadUserName() async {
             title: 'Religious',
             description: 'Religious clubs in the campus',
           ),
-
         ];
       default:
         return [];
@@ -188,42 +185,11 @@ Future<void>    _loadUserName() async {
                 icon: _isSearching ? const Icon(Icons.close) : const Icon(Icons.search, size: 35),
                 onPressed: _isSearching ? _stopSearch : _startSearch,
               ),
-
             ],
           ),
         ),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: const <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Color(0xFF6431F4),
-              ),
-              child: Text(
-                'Drawer Header',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.message),
-              title: Text('Messages'),
-            ),
-            ListTile(
-              leading: Icon(Icons.account_circle),
-              title: Text('Profile'),
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
-            ),
-          ],
-        ),
-      ),
+      drawer: const AppDrawer(),
       body: _isSearching
           ? _buildSearchResults()
           : Padding(
@@ -234,7 +200,7 @@ Future<void>    _loadUserName() async {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                 Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
@@ -256,10 +222,6 @@ Future<void>    _loadUserName() async {
                     // Implement profile action here
                   },
                 ),
-                // IconButton(
-                //   icon: const Icon(Icons.search, size: 35),
-                //   onPressed: _startSearch,
-                // ),
               ],
             ),
             const SizedBox(height: 20),
