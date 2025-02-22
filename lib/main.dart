@@ -7,7 +7,6 @@ import 'package:nex_planner/model/reminder.dart';
 import 'package:nex_planner/model/schedule.dart';
 import 'package:nex_planner/pages/AuthPage/welcome_page.dart';
 import 'package:nex_planner/pages/HomePage/home_page.dart';
-import 'package:nex_planner/pages/UserForm/userForm_page.dart';
 import 'package:nex_planner/provider/reminder_provider.dart';
 import 'package:nex_planner/provider/classSchedule_provider.dart';
 import 'package:provider/provider.dart';
@@ -50,9 +49,9 @@ class MyApp extends StatelessWidget {
       initialRoute: isFormFilled ? '/userForm' : '/userForm',
       routes: {
         '/home': (context) => const HomePage(),
-        '/userForm': (context) =>  WelcomePage(),
+        '/userForm': (context) =>  const WelcomePage(),
       },
-      title: 'Flutter Demo',
+      // title: 'Flutter Demo',
       home: const HomePage(),
     );
   }
