@@ -9,7 +9,7 @@ import 'AppDrawer/app_drawer.dart';
 import 'category_tab.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, });
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -33,9 +33,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _loadUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userName = prefs.getString('userName') ?? 'User';
+    String? userName = prefs.getString('studentName') ?? 'User';
+    String firstName = userName.split(' ').first;
     setState(() {
-      _userName = userName;
+      _userName = firstName;
     });
   }
 
@@ -204,7 +205,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      'Hello $_userName',
+                      'Hello ${_userName.toLowerCase()}',
                       style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     const Text(
