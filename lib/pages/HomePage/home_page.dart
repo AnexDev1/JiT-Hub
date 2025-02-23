@@ -31,13 +31,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _loadUserName();
   }
 
+// dart
   Future<void> _loadUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userName = prefs.getString('studentName') ?? 'User';
-    String firstName = userName.split(' ').first;
-    setState(() {
-      _userName = firstName;
-    });
+    bool isGuest = prefs.getBool('isGuest') ?? false;
+    if (isGuest) {
+      setState(() {
+        _userName = "Guest";
+      });
+    } else {
+      String? userName = prefs.getString('studentName') ?? "User";
+      String firstName = userName.split(' ').first;
+      setState(() {
+        _userName = firstName;
+      });
+    }
   }
 
   void _startSearch() {

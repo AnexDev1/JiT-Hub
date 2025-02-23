@@ -1,3 +1,4 @@
+// File: lib/pages/AuthPage/register_page.dart
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -41,7 +42,7 @@ class RegisterPage extends StatelessWidget {
       await prefs.setString('firstName', firstName);
       await prefs.setBool('isLoggedIn', true);
 
-      // Navigate to HomePage with the first name
+      // Navigate to GreetingPage
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -51,6 +52,18 @@ class RegisterPage extends StatelessWidget {
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<void> _loginAsGuest(BuildContext context) async {
+    // Set guest flag and navigate to GreetingPage
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isGuest', true);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomePage(),
+      ),
+    );
   }
 
   @override
@@ -94,7 +107,7 @@ class RegisterPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Image.asset(
-                'lib/assets/verification.jpeg', // Path to your image asset
+                'lib/assets/verification.jpeg',
                 height: 300,
               ),
               const SizedBox(height: 20),
@@ -131,27 +144,57 @@ class RegisterPage extends StatelessWidget {
               ),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _captureAndProcessImage(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Jost',
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Scan ID button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _captureAndProcessImage(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Jost',
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                        ),
+                        child: const Text(
+                          'Scan ID',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      'Scan ID',
-                      style: TextStyle(color: Colors.white),
+                    const SizedBox(height: 10),
+                    // Login as Guest button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _loginAsGuest(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Jost',
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                        ),
+                        child: const Text(
+                          'Login as Guest',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],
