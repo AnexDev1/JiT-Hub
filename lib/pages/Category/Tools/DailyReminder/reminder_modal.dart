@@ -1,7 +1,7 @@
+// File: lib/pages/Category/Tools/DailyReminder/reminder_modal.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:nex_planner/model/reminder.dart';
-
 import '../../../../provider/reminder_provider.dart';
 
 class ReminderModal extends StatefulWidget {
@@ -29,49 +29,114 @@ class _ReminderModalState extends State<ReminderModal> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: AlertDialog(
-        title: const Text('Add Reminder'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        backgroundColor: Colors.white,
+        title: Text(
+          'Add Reminder',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).primaryColor,
+          ),
+          textAlign: TextAlign.center,
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: _noteController,
-              decoration: const InputDecoration(labelText: 'Note'),
+              decoration: InputDecoration(
+                labelText: 'Note',
+                labelStyle: TextStyle(
+                  color: Colors.grey[700],
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             ),
-            const SizedBox(height: 8.0),
+            const SizedBox(height: 15.0),
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    _selectedDate == null
-                        ? 'No date chosen!'
-                        : 'Picked Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}',
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      _selectedDate == null
+                          ? 'No date chosen!'
+                          : 'Picked Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ),
                 ),
-                TextButton(
+                const SizedBox(width: 10),
+                OutlinedButton(
                   onPressed: _presentDatePicker,
-                  child: const Text('Choose Date'),
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    side: BorderSide(color: Theme.of(context).primaryColor),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  child: const Text(
+                    'Choose Date',
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ],
             ),
+            const SizedBox(height: 15.0),
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    _selectedTime == null
-                        ? 'No time chosen!'
-                        : 'Picked Time: ${_selectedTime!.format(context)}',
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      _selectedTime == null
+                          ? 'No time chosen!'
+                          : 'Picked Time: ${_selectedTime!.format(context)}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ),
                 ),
-                TextButton(
+                const SizedBox(width: 10),
+                OutlinedButton(
                   onPressed: _presentTimePicker,
-                  child: const Text('Choose Time'),
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    side: BorderSide(color: Theme.of(context).primaryColor),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  child: const Text(
+                    'Choose Time',
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 8.0),
+            const SizedBox(height: 15.0),
             Row(
               children: [
-                const Text('Remind Me'),
+                const Text('Remind Me', style: TextStyle(fontSize: 16)),
+                const SizedBox(width: 10),
                 Switch(
                   value: _remindMe,
                   onChanged: (value) {
@@ -81,6 +146,18 @@ class _ReminderModalState extends State<ReminderModal> {
                   },
                 ),
               ],
+            ),
+            const SizedBox(height: 15.0),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Select Category',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              ),
             ),
             const SizedBox(height: 8.0),
             _buildCategoryOption('Assignment'),
@@ -93,7 +170,15 @@ class _ReminderModalState extends State<ReminderModal> {
             onPressed: () {
               Navigator.pop(context);
             },
-            child: const Text('Cancel'),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.black,
+              backgroundColor: Colors.grey.shade300,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontSize: 16),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -119,7 +204,15 @@ class _ReminderModalState extends State<ReminderModal> {
                 Navigator.pop(context);
               }
             },
-            child: const Text('Add'),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text(
+              'Add',
+              style: TextStyle(fontSize: 16),
+            ),
           ),
         ],
       ),
@@ -138,7 +231,7 @@ class _ReminderModalState extends State<ReminderModal> {
             });
           },
         ),
-        Text(category),
+        Text(category, style: const TextStyle(fontSize: 16)),
       ],
     );
   }

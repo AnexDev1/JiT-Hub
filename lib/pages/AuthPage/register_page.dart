@@ -68,36 +68,39 @@ class RegisterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> items = [
+    // List of restricted modules for guest users
+    final List<Map<String, dynamic>> restrictedItems = [
       {
-        'icon': Icons.school,
-        'title': 'University',
-        'subtitle': 'Information about the university'
+        'icon': Icons.calendar_today,
+        'title': 'Academic Calendar',
+        'subtitle': ' Details about academic schedules',
       },
       {
-        'icon': Icons.book,
-        'title': 'Courses',
-        'subtitle': 'Details about available courses'
+        'icon': Icons.local_cafe,
+        'title': 'Cafe Menu',
+        'subtitle': 'Exclusive cafe offers',
       },
       {
-        'icon': Icons.event,
-        'title': 'Events',
-        'subtitle': 'Upcoming university events'
+        'icon': Icons.computer,
+        'title': 'Study AI',
+        'subtitle': 'Access to AI study tools',
       },
       {
-        'icon': Icons.people,
-        'title': 'Community',
-        'subtitle': 'Join the university community'
+        'icon': Icons.schedule,
+        'title': 'Class Schedule',
+        'subtitle': 'Personalized class timings',
       },
       {
-        'icon': Icons.support,
-        'title': 'Support',
-        'subtitle': 'Get support and help'
+        'icon': Icons.photo_album,
+        'title': 'Gallery',
+        'subtitle': 'Access to exclusive gallery content',
+      },
+      {
+        'icon': Icons.account_balance,
+        'title': 'Religious',
+        'subtitle': 'Details about religious events',
       },
     ];
-
-    final random = Random();
-    final randomItems = List.generate(3, (_) => items[random.nextInt(items.length)]);
 
     return Scaffold(
       body: Center(
@@ -129,11 +132,12 @@ class RegisterPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
+              // Displaying the list of restricted items
               Expanded(
                 child: ListView.builder(
-                  itemCount: randomItems.length,
+                  itemCount: restrictedItems.length,
                   itemBuilder: (context, index) {
-                    final item = randomItems[index];
+                    final item = restrictedItems[index];
                     return ListTile(
                       leading: Icon(item['icon']),
                       title: Text(item['title']),
@@ -147,7 +151,6 @@ class RegisterPage extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Scan ID button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -171,7 +174,6 @@ class RegisterPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // Login as Guest button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
