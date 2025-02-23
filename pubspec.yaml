@@ -37,7 +37,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.16
-  convex_bottom_bar: ^3.2.0
   shared_preferences: ^2.3.4
   intl: ^0.20.1
   provider: ^6.1.2
@@ -49,9 +48,6 @@ dependencies:
   flutter_dotenv: ^5.2.1
   flutter_markdown: ^0.7.5
   flutter_gemini: ^3.0.0
-  webview_flutter: ^4.10.0
-  webview_flutter_android: ^4.2.0
-  webview_flutter_wkwebview: ^3.17.0
   flutter_native_splash: ^2.4.4
 
 dev_dependencies:
@@ -92,6 +88,9 @@ flutter:
     - .env
     - lib/assets/splash.jpg
     - lib/assets/image1.png
+    - lib/assets/onboarding1.png
+    - lib/assets/onboarding2.png
+    - lib/assets/onboarding3.png
     - lib/assets/image1.svg
     - lib/assets/verification.jpeg
     - lib/assets/jit.png
@@ -137,3 +136,5 @@ flutter_native_splash:
   image: lib/assets/splash.jpg
   android: true
   ios: true
+
+

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-
 import '../HomePage/home_page.dart';
+
 
 class GreetingPage extends StatefulWidget {
   const GreetingPage({super.key});
@@ -31,7 +31,7 @@ class _GreetingPageState extends State<GreetingPage> {
 
     String prompt = 'Greet the user firstname  $firstName and lastname $middleName, convert to lowercase and welcome him to the app. '
         'Talk about the department he enrolls in, which is $department, and mention some good things about it. '
-        'For the $studentId, if it starts with EU it means he is an extension student, if it starts with RU it means the student is a regular class attending student.';
+        'For the $studentId, if it starts with EU it means he is an extension student, if it starts with RU it means the student is a regular class attending student.try to use some emojis to explain the feeling ';
 
     await _sendRequestToAI(prompt);
   }
