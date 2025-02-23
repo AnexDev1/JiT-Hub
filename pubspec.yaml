@@ -52,6 +52,7 @@ dependencies:
   webview_flutter: ^4.10.0
   webview_flutter_android: ^4.2.0
   webview_flutter_wkwebview: ^3.17.0
+  flutter_native_splash: ^2.4.4
 
 dev_dependencies:
   hive_generator: ^1.0.0
@@ -89,8 +90,10 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - .env
+    - lib/assets/splash.jpg
     - lib/assets/image1.png
     - lib/assets/image1.svg
+    - lib/assets/verification.jpeg
     - lib/assets/jit.png
     - lib/assets/jit.jpg
     - lib/assets/civil.jpg
@@ -129,3 +132,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_native_splash:
+  color: "#ffffff"
+  image: lib/assets/splash.jpg
+  android: true
+  ios: true

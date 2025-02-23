@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
 
-
   Future<void> _captureAndProcessImage(BuildContext context) async {
     final ImagePicker _picker = ImagePicker();
     try {
@@ -40,9 +39,10 @@ class RegisterPage extends StatelessWidget {
       await prefs.setString('program', program);
       await prefs.setString('studentID', studentID);
       await prefs.setString('firstName', firstName);
+      await prefs.setBool('isLoggedIn', true);
 
       // Navigate to HomePage with the first name
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => const GreetingPage(),
@@ -52,8 +52,40 @@ class RegisterPage extends StatelessWidget {
       print(e);
     }
   }
+
   @override
   Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> items = [
+      {
+        'icon': Icons.school,
+        'title': 'University',
+        'subtitle': 'Information about the university'
+      },
+      {
+        'icon': Icons.book,
+        'title': 'Courses',
+        'subtitle': 'Details about available courses'
+      },
+      {
+        'icon': Icons.event,
+        'title': 'Events',
+        'subtitle': 'Upcoming university events'
+      },
+      {
+        'icon': Icons.people,
+        'title': 'Community',
+        'subtitle': 'Join the university community'
+      },
+      {
+        'icon': Icons.support,
+        'title': 'Support',
+        'subtitle': 'Get support and help'
+      },
+    ];
+
+    final random = Random();
+    final randomItems = List.generate(3, (_) => items[random.nextInt(items.length)]);
+
     return Scaffold(
       body: Center(
         child: Padding(
@@ -61,33 +93,65 @@ class RegisterPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(
-                'Register',
+              Image.asset(
+                'lib/assets/verification.jpeg', // Path to your image asset
+                height: 300,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Verify ID for Full Access',
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                  fontFamily: 'Jost',
+                  color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 50),
-              ElevatedButton(
-                onPressed: () => _captureAndProcessImage(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  textStyle: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Jost',
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                  ),
+              const SizedBox(height: 10),
+              const Text(
+                'Complete the process in just a few steps to verify your profile',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
                 ),
-                child: const Text(
-                  'Scan ID',
-                  style: TextStyle(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: randomItems.length,
+                  itemBuilder: (context, index) {
+                    final item = randomItems[index];
+                    return ListTile(
+                      leading: Icon(item['icon']),
+                      title: Text(item['title']),
+                      subtitle: Text(item['subtitle']),
+                    );
+                  },
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => _captureAndProcessImage(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      textStyle: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Jost',
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                    ),
+                    child: const Text(
+                      'Scan ID',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ),
               ),
             ],

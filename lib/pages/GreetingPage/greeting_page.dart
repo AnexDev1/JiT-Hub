@@ -53,7 +53,7 @@ class _GreetingPageState extends State<GreetingPage> {
   }
 
   void _goToHome() {
-    Navigator.of(context).push(
+    Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const HomePage(),
       ),
@@ -63,9 +63,7 @@ class _GreetingPageState extends State<GreetingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Welcome'),
-      ),
+
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

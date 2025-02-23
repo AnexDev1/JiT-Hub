@@ -44,9 +44,9 @@ class StudyAILogic {
   Future<void> _sendRequestToAI(String prompt) async {
     isLoading = true;
 
-    Gemini.instance.promptStream(parts: [
+    Gemini.instance.prompt(parts: [
       Part.text(prompt)
-    ]).listen((value) {
+    ]).then((value) {
       final output = value?.output ?? '';
       _responses.add(output);
       _streamController.add(output);
