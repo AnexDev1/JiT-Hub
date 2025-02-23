@@ -18,8 +18,8 @@ class _StudyAIState extends State<StudyAI> {
     String inputText = _inputController.text;
     if (inputText.isNotEmpty) {
       setState(() {
+        _logic.responses.add('User: $inputText');
         _logic.isLoading = true;
-        _logic.clearResponses();
       });
       await _logic.chatWithAI(inputText);
       setState(() {
@@ -108,35 +108,34 @@ class _StudyAIState extends State<StudyAI> {
                   : StreamBuilder<String>(
                 stream: _logic.responseStream,
                 builder: (context, snapshot) {
-                  if (_logic.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: Text(''));
-                  } else if (snapshot.hasError) {
-                    return const Center(child: Text('Error occurred'));
-                  } else if (!snapshot.hasData || _logic.responses.isEmpty) {
-                    return const Center(child: Text('No responses yet'));
-                  } else {
-                    return Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: SingleChildScrollView(
-                        controller: _scrollController,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: _logic.responses.map((response) {
-                            return MarkdownBody(
-                              data: response,
-                              styleSheet: MarkdownStyleSheet(
-                                p: const TextStyle(fontSize: 16.0),
-                              ),
-                            );
-                          }).toList(),
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: _logic.responses.length,
+                    itemBuilder: (context, index) {
+                      final response = _logic.responses[index];
+                      final isUser = response.startsWith('User: ');
+                      final message = isUser ? response.substring(6) : response;
+                      return Align(
+                        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                          decoration: BoxDecoration(
+                            color: isUser ? Colors.blue[100] : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: MarkdownBody(
+                            data: message,
+                            styleSheet: MarkdownStyleSheet(
+                              p: const TextStyle(fontSize: 16.0),
+                            ),
+                          ),
                         ),
-                      ),
-                    );
-                  }
+                      );
+                    },
+                  );
                 },
-              )
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),

@@ -41,6 +41,7 @@ class RegisterPage extends StatelessWidget {
       await prefs.setString('studentID', studentID);
       await prefs.setString('firstName', firstName);
       await prefs.setBool('isLoggedIn', true);
+      await prefs.setBool('isGuest', false);
 
       // Navigate to GreetingPage
       Navigator.pushReplacement(

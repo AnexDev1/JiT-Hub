@@ -1,9 +1,9 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 
 class StudyAILogic {
@@ -44,12 +44,20 @@ class StudyAILogic {
   Future<void> _sendRequestToAI(String prompt) async {
     isLoading = true;
 
-    Gemini.instance.prompt(parts: [
-      Part.text(prompt)
-    ]).then((value) {
+    final gemini = Gemini.instance;
+
+    gemini.chat([
+      Content(parts: [
+        Part.text(prompt)],
+          role: 'user'),
+    ])
+        .then((value) {
       final output = value?.output ?? '';
       _responses.add(output);
       _streamController.add(output);
+    })
+        .catchError((e) {
+      log('chat', error: e);
     });
 
     isLoading = false;
@@ -69,5 +77,6 @@ class StudyAILogic {
 
   void clearResponses() {
     _responses.clear();
+    _streamController.add('');
   }
 }
