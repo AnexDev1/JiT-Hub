@@ -18,37 +18,79 @@ class RegisterPage extends StatelessWidget {
       if (image == null) return;
 
       final inputImage = InputImage.fromFilePath(image.path);
-      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
-      final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
+      final textRecognizer =
+      TextRecognizer(script: TextRecognitionScript.latin);
+      final RecognizedText recognizedText =
+      await textRecognizer.processImage(inputImage);
 
-      String text = recognizedText.text;
-      List<String> lines = text.split('\n');
-      String universityName = lines.isNotEmpty ? lines[0].trim() : '';
-      String studentName = lines.length > 2 ? lines[2].trim() : '';
-      String department = lines.length > 3 ? lines[3].trim() : '';
-      String program = lines.length > 4 ? lines[4].trim() : '';
-      String studentID = lines.length > 5 ? lines[5].trim() : '';
-      String firstName = studentName.split(' ').first;
+      String rawText = recognizedText.text;
+      print(rawText);
+      List<String> lines = rawText.split('\n');
+
+      String universityName = '';
+      String studentName = '';
+      String department = '';
+      String studentID = '';
+
+      // Define regex to detect a line with full uppercase letters and spaces
+      RegExp fullNameRegex = RegExp(r'^[A-Z\s]+$');
+
+      // Loop through each line and check patterns
+      for (String line in lines) {
+        String trimmed = line.trim();
+        if (trimmed.isEmpty) continue;
+
+        // Check for 'Jimma University'
+        if (universityName.isEmpty &&
+            trimmed.toLowerCase().contains('jimma university')) {
+          universityName = trimmed;
+          continue;
+        }
+
+        // Check for student ID from lines starting with 'RU' or 'EU'
+        if (studentID.isEmpty &&
+            (trimmed.startsWith('RU') || trimmed.startsWith('EU'))) {
+          studentID = trimmed;
+          continue;
+        }
+
+        // Check for department indicators
+        if (department.isEmpty &&
+            (trimmed.contains('B.Sc') ||
+                trimmed.contains('B.A') ||
+                trimmed.contains('M.Sc') ||
+                trimmed.contains('M.A'))) {
+          department = trimmed;
+          continue;
+        }
+
+        // Check if the line is entirely uppercase using the regex for student name
+        if (studentName.isEmpty && fullNameRegex.hasMatch(trimmed)) {
+          studentName = trimmed;
+          continue;
+        }
+      }
 
       textRecognizer.close();
 
-      // Save data to SharedPreferences
+      // Split the full name into first and middle names
+      List<String> nameParts = studentName.split(RegExp(r'\s+'));
+      String firstName = nameParts.isNotEmpty ? nameParts[0] : '';
+      String middleName = nameParts.length > 1 ? nameParts[1] : '';
+
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('universityName', universityName);
       await prefs.setString('studentName', studentName);
       await prefs.setString('department', department);
-      await prefs.setString('program', program);
       await prefs.setString('studentID', studentID);
       await prefs.setString('firstName', firstName);
+      await prefs.setString('middleName', middleName);
       await prefs.setBool('isLoggedIn', true);
       await prefs.setBool('isGuest', false);
 
-      // Navigate to GreetingPage
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => const GreetingPage(),
-        ),
+        MaterialPageRoute(builder: (context) => const GreetingPage()),
       );
     } catch (e) {
       print(e);
@@ -56,20 +98,16 @@ class RegisterPage extends StatelessWidget {
   }
 
   Future<void> _loginAsGuest(BuildContext context) async {
-    // Set guest flag and navigate to GreetingPage
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isGuest', true);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => const HomePage(),
-      ),
+      MaterialPageRoute(builder: (context) => const HomePage()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // List of restricted modules for guest users
     final List<Map<String, dynamic>> restrictedItems = [
       {
         'icon': Icons.calendar_today,
@@ -133,7 +171,6 @@ class RegisterPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              // Displaying the list of restricted items
               Expanded(
                 child: ListView.builder(
                   itemCount: restrictedItems.length,
@@ -157,7 +194,8 @@ class RegisterPage extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () => _captureAndProcessImage(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                          backgroundColor:
+                          Theme.of(context).colorScheme.secondary,
                           padding: const EdgeInsets.symmetric(vertical: 15),
                           textStyle: const TextStyle(
                             fontSize: 18,
