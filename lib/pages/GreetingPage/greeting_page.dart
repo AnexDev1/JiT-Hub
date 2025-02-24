@@ -26,12 +26,12 @@ class _GreetingPageState extends State<GreetingPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String firstName = prefs.getString('firstName') ?? 'User';
     String middleName = prefs.getString('middleName') ?? '';
-    String department = prefs.getString('department') ?? 'your department';
+    String department = prefs.getString('department') ?? 'no department';
     String studentId = prefs.getString('studentID') ?? '';
+    String university = prefs.getString('universityName') ?? '';
 
-    return 'Greet the user firstname $firstName and lastname $middleName, convert to lowercase and welcome him to the app. '
-        'Talk about the department he enrolls in, which is $department, and mention some good things about it. '
-        'For the $studentId, if it starts with EU it means he is an extension student, if it starts with RU it means the student is a regular class attending student. Try to use some emojis to explain the feeling.';
+    return 'Hi $firstName add space then $middleName converted to first letter upercase , welcome to $university. lowercase the unviersity name too '
+        'You are a student of $department department with ID $studentId. say some good things about the department and if the $studentId starts with EU it means they are extension student and if it starts with RU and that means they are regular student , based on that motivate them to keep up . try to use emojis and style the texts ' ;
   }
 
   Future<void> _generateGreeting() async {
