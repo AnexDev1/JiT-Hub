@@ -2,9 +2,11 @@
 package="com.nexplanner.nex_planner">
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="Nex Planner"
+        android:label="JIT Hub"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
@@ -28,6 +30,7 @@ package="com.nexplanner.nex_planner">
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW"/>

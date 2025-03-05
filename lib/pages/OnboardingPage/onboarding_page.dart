@@ -28,7 +28,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               children: <Widget>[
                 _buildPageContent(
                   image: 'lib/assets/onboarding1.png',
-                  title: 'Welcome to JIT Labs',
+                  title: 'Welcome to JIT Hub',
                   description: 'Manage your academic schedules efficiently.',
                 ),
                 _buildPageContent(

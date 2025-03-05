@@ -147,7 +147,7 @@ class DailyReminder extends StatelessWidget {
             builder: (context) {
               return ReminderModal(
                 onAddReminder: reminderProvider.loadReminders,
-                onAddReminderCallback: reminderProvider.loadReminders,
+                // onAddReminderCallback: reminderProvider.loadReminders,
               );
             },
           );

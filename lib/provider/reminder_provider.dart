@@ -24,4 +24,10 @@ class ReminderProvider with ChangeNotifier {
     reminderBox.deleteAt(index);
     loadReminders();
   }
+
+  void updateReminder(int index, Reminder reminder) {
+    final reminderBox = Hive.box<Reminder>('remindersBox');
+    reminderBox.putAt(index, reminder);
+    loadReminders();
+  }
 }

@@ -1,105 +1,185 @@
-// File: lib/pages/AuthPage/register_page.dart
-import 'dart:math';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:nex_planner/pages/GreetingPage/greeting_page.dart';
+import '../../services/generative_ai_service.dart';
 import '../HomePage/home_page.dart';
-import 'extracted_info_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
-  Future<void> _captureAndProcessImage(BuildContext context) async {
-    final ImagePicker _picker = ImagePicker();
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  bool _isProcessing = false;
+  GenerativeAIService? _aiService;
+  bool _isAIInitialized = false;
+  String? _apiKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadApiKey();
+  }
+
+  Future<void> _loadApiKey() async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-      if (image == null) return;
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String apiKey = prefs.getString('apikey') ?? '';
 
-      final inputImage = InputImage.fromFilePath(image.path);
-      final textRecognizer =
-      TextRecognizer(script: TextRecognitionScript.latin);
-      final RecognizedText recognizedText =
-      await textRecognizer.processImage(inputImage);
+      setState(() {
+        _apiKey = apiKey;
+      });
 
-      String rawText = recognizedText.text;
-      print(rawText);
-      List<String> lines = rawText.split('\n');
+      if (apiKey.isNotEmpty) {
+        await _initializeAI(apiKey);
+      }
+    } catch (e) {
+      debugPrint('Error loading API key: $e');
+    }
+  }
 
-      String universityName = '';
-      String studentName = '';
-      String department = '';
-      String studentID = '';
+  Future<void> _initializeAI(String apiKey) async {
+    try {
+      setState(() => _isProcessing = true);
 
-      // Define regex to detect a line with full uppercase letters and spaces
-      RegExp fullNameRegex = RegExp(r'^[A-Z\s]+$');
+      _aiService = GenerativeAIService(apiKey: apiKey);
 
-      // Loop through each line and check patterns
-      for (String line in lines) {
-        String trimmed = line.trim();
-        if (trimmed.isEmpty) continue;
+      // Wait a moment for initialization
+      await Future.delayed(const Duration(milliseconds: 500));
 
-        // Check for 'Jimma University'
-        if (universityName.isEmpty &&
-            trimmed.toLowerCase().contains('jimma university')) {
-          universityName = trimmed;
-          continue;
-        }
+      setState(() {
+        _isAIInitialized = _aiService?.isInitialized ?? false;
+        _isProcessing = false;
+      });
 
-        // Check for student ID from lines starting with 'RU' or 'EU'
-        if (studentID.isEmpty &&
-            (trimmed.startsWith('RU') || trimmed.startsWith('EU'))) {
-          studentID = trimmed;
-          continue;
-        }
+    } catch (e) {
+      setState(() {
+        _isAIInitialized = false;
+        _isProcessing = false;
+      });
+      debugPrint('AI initialization error: $e');
+    }
+  }
 
-        // Check for department indicators
-        if (department.isEmpty &&
-            (trimmed.contains('B.Sc') ||
-                trimmed.contains('B.A') ||
-                trimmed.contains('M.Sc') ||
-                trimmed.contains('M.A'))) {
-          department = trimmed;
-          continue;
-        }
+  Future<void> _captureAndProcessImage(BuildContext context) async {
+    if (_apiKey == null || _apiKey!.isEmpty) {
+      _showApiKeyDialog();
+      return;
+    }
 
-        // Check if the line is entirely uppercase using the regex for student name
-        if (studentName.isEmpty && fullNameRegex.hasMatch(trimmed)) {
-          studentName = trimmed;
-          continue;
-        }
+    if (!_isAIInitialized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('AI service not initialized. Check your API key.')),
+      );
+      return;
+    }
+
+    setState(() => _isProcessing = true);
+    final ImagePicker picker = ImagePicker();
+
+    try {
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+      );
+
+      if (image == null) {
+        setState(() => _isProcessing = false);
+        return;
       }
 
-      textRecognizer.close();
-
-      // Split the full name into first and middle names
-      List<String> nameParts = studentName.split(RegExp(r'\s+'));
-      String firstName = nameParts.isNotEmpty ? nameParts[0] : '';
-      String middleName = nameParts.length > 1 ? nameParts[1] : '';
+      final File imageFile = File(image.path);
+      final Map<String, dynamic> idInfo = await _aiService!.processIDCard(imageFile);
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('universityName', universityName);
-      await prefs.setString('studentName', studentName);
-      await prefs.setString('department', department);
-      await prefs.setString('studentID', studentID);
-      await prefs.setString('firstName', firstName);
-      await prefs.setString('middleName', middleName);
+      await prefs.setString('universityName', idInfo['universityName']);
+      await prefs.setString('studentName', idInfo['studentName']);
+      await prefs.setString('firstName', idInfo['firstName']);
+      await prefs.setString('middleName', idInfo['middleName']);
+      await prefs.setString('department', idInfo['department']);
+      await prefs.setString('studentID', idInfo['studentID']);
       await prefs.setBool('isLoggedIn', true);
       await prefs.setBool('isGuest', false);
+      await prefs.setBool('isVerified', idInfo['isLegitimate'] == true);
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const GreetingPage()),
-      );
+      setState(() => _isProcessing = false);
+
+      if (idInfo['isLegitimate'] == true) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const GreetingPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(idInfo['reasoning']),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
     } catch (e) {
-      print(e);
+      setState(() => _isProcessing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
     }
+  }
+
+  void _showApiKeyDialog() {
+    final TextEditingController apiKeyController = TextEditingController(text: _apiKey);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Enter Google Gemini API Key'),
+          content: TextField(
+            controller: apiKeyController,
+            decoration: const InputDecoration(
+              hintText: 'Paste your API key here',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                String apiKey = apiKeyController.text.trim();
+                if (apiKey.isNotEmpty) {
+                  Navigator.of(context).pop();
+                  await _saveApiKey(apiKey);
+                  await _initializeAI(apiKey);
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _saveApiKey(String apiKey) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('apikey', apiKey);
+    setState(() {
+      _apiKey = apiKey;
+    });
   }
 
   Future<void> _loginAsGuest(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isGuest', true);
+    await prefs.setBool('isLoggedIn', true);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const HomePage()),
@@ -112,7 +192,7 @@ class RegisterPage extends StatelessWidget {
       {
         'icon': Icons.calendar_today,
         'title': 'Academic Calendar',
-        'subtitle': ' Details about academic schedules',
+        'subtitle': 'Details about academic schedules',
       },
       {
         'icon': Icons.local_cafe,
@@ -142,7 +222,18 @@ class RegisterPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      body: Center(
+      appBar: AppBar(
+        title: const Text('Student Verification'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: _showApiKeyDialog,
+          ),
+        ],
+      ),
+      body: _isProcessing
+          ? const Center(child: CircularProgressIndicator())
+          : Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(

@@ -49,8 +49,15 @@ dependencies:
   flutter_markdown: ^0.7.5
   flutter_gemini: ^3.0.0
   flutter_native_splash: ^2.4.4
+  google_generative_ai: ^0.4.6
+  file_picker: ^9.0.2
+  animated_text_kit: ^4.2.3
+  lottie: ^3.3.1
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.10.0
 
 dev_dependencies:
+  flutter_launcher_icons: "^0.14.3"
   hive_generator: ^1.0.0
   build_runner: ^2.0.0
   flutter_test:
@@ -131,6 +138,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "lib/assets/splash.jpg"
+  min_sdk_android: 21
 flutter_native_splash:
   color: "#ffffff"
   image: lib/assets/splash.jpg

@@ -17,25 +17,34 @@ class ReminderAdapter extends TypeAdapter<Reminder> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Reminder(
-      title: fields[0] as String,
-      date: fields[1] as DateTime,
+      title: fields[1] as String,
+      date: fields[2] as DateTime,
       category: fields[3] as String,
       remindMe: fields[4] as bool,
+      uuid: fields[0] as String,
+      description: fields[5] as String,
+      isDone: fields[6] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, Reminder obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(7)
       ..writeByte(0)
-      ..write(obj.title)
+      ..write(obj.uuid)
       ..writeByte(1)
+      ..write(obj.title)
+      ..writeByte(2)
       ..write(obj.date)
       ..writeByte(3)
       ..write(obj.category)
       ..writeByte(4)
-      ..write(obj.remindMe);
+      ..write(obj.remindMe)
+      ..writeByte(5)
+      ..write(obj.description)
+      ..writeByte(6)
+      ..write(obj.isDone);
   }
 
   @override
