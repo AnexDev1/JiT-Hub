@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:nex_planner/model/reminder.dart';
-import '../../../../provider/reminder_provider.dart';
+import '../../../../../provider/reminder_provider.dart';
 
 class ReminderModal extends StatefulWidget {
   final Function onAddReminder;

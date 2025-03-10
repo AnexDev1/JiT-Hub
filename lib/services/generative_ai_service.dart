@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+
+import '../model/chat_message.dart';
 
 class GenerativeAIService {
   final String apiKey;
@@ -9,6 +12,10 @@ class GenerativeAIService {
   GenerativeModel? _textModel;
   bool _isInitialized = false;
   String? _initError;
+
+  final List<ChatMessage> _chatHistory = [];
+  final StreamController<String> _streamController = StreamController<String>.broadcast();
+  Stream<String> get responseStream => _streamController.stream;
 
   GenerativeAIService({required this.apiKey}) {
     if (apiKey.isEmpty) {
@@ -19,12 +26,12 @@ class GenerativeAIService {
 
     _initializeModels();
   }
-
+  List<ChatMessage> get chatHistory => _chatHistory;
   void _initializeModels() {
     try {
       // Vision model for ID card processing
       _visionModel = GenerativeModel(
-        model: 'gemini-1.5-flash-latest',
+        model: 'gemini-2.0-flash',
         apiKey: apiKey,
         generationConfig: GenerationConfig(
           temperature: 0.4,
@@ -32,18 +39,25 @@ class GenerativeAIService {
           topP: 1,
           maxOutputTokens: 4096,
         ),
+        systemInstruction: Content('system',  [
+          TextPart('You are a helpful AI assistant that processes images and provides detailed responses.')
+        ])
       );
 
       // Text model
       _textModel = GenerativeModel(
-        model: 'gemini-1.5-flash-latest',  // Use gemini-pro instead of gemini-2.0-flash
+        model: 'gemini-2.0-flash',  // Use gemini-pro instead of gemini-2.0-flash
         apiKey: apiKey,
         generationConfig: GenerationConfig(
           temperature: 1,
           topK: 40,
           topP: 0.95,
           maxOutputTokens: 4096,
+          responseMimeType: 'text/plain',
         ),
+        systemInstruction: Content('system', [
+          TextPart('You are a helpful AI assistant that provides useful information and responds to queries conversationally.')
+        ]),
       );
 
       _isInitialized = true;
@@ -80,7 +94,7 @@ class GenerativeAIService {
        - Does it have official markings, logo, or stamps?
        - Does it have a consistent design/layout?
        - Is the text professionally printed (not markers or pen)?
-    If user is not from jimma uniiversity , the model should tell them that its aware that they are not from jimma university. but it will still let them use the app.
+    If user is not from jimma university , the model should tell them that its aware that they are not from jimma university. but it will still let them use the app.
     Respond in valid JSON format only with the following structure:
     {
       "universityName": "full university name",

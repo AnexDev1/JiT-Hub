@@ -1,3 +1,4 @@
+// dart
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -6,7 +7,9 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
-import '../../../services/study_ai_logic.dart';
+
+import '../../../../../model/chat_message.dart';
+import '../../../../../services/study_ai_logic.dart';
 
 class StudyAI extends StatefulWidget {
   const StudyAI({super.key});
@@ -30,44 +33,102 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    // Add welcome message
-    _logic.responses.add("Hello! I'm your Study AI assistant. How can I help you today?");
+    // Add welcome message as ChatMessage
+    _logic.responses.add(
+      ChatMessage(
+        from: "ai",
+        content: "Hello! I'm your Study AI assistant. How can I help you today?",
+      ),
+    );
   }
 
   void _submitInput() async {
     String inputText = _inputController.text.trim();
-    if (inputText.isEmpty) return;
+    if (inputText.isEmpty && _pendingImageFile == null && _pendingFileBytes == null) return;
 
-    // Add user message to chat
-    _logic.responses.add('User: $inputText');
+    Uint8List? attachmentData;
+    String? mimeType;
+    String? fileName;
+    File? tempImageFile;
 
-    // Clear input field and show typing indicator
+    // Store temporary references before clearing
+    if (_pendingImageFile != null) {
+      tempImageFile = _pendingImageFile;
+      attachmentData = await _pendingImageFile!.readAsBytes();
+      mimeType = 'image/jpeg';
+    } else if (_pendingFileBytes != null) {
+      attachmentData = _pendingFileBytes;
+      mimeType = 'application/octet-stream';
+      fileName = _pendingFileName;
+    }
+
+    // Add attachment as a separate message if present
+    if (attachmentData != null) {
+      ChatMessage attachmentMessage = ChatMessage(
+        from: "user",
+        content: "",
+        attachmentBytes: attachmentData,
+        mime: mimeType,
+        fileName: fileName,
+      );
+
+      // Add image message
+      _logic.responses.add(attachmentMessage);
+    }
+
+    // Add text message if present
+    if (inputText.isNotEmpty) {
+      ChatMessage textMessage = ChatMessage(
+        from: "user",
+        content: inputText,
+        attachmentBytes: null,
+        mime: null,
+        fileName: null,
+      );
+
+      // Add text message
+      _logic.responses.add(textMessage);
+    }
+
+    // Clear inputs and preview immediately
     setState(() {
       _inputController.clear();
+      _pendingImageFile = null;
+      _pendingFileBytes = null;
+      _pendingFileName = '';
+      _pendingAttachmentType = '';
       _isGenerating = true;
     });
 
     _scrollToEnd();
 
     try {
-      if (_pendingImageFile != null || _pendingFileBytes != null) {
-        // Process attachment with the user's prompt
-        if (_pendingImageFile != null) {
-          await _logic.processImageWithPrompt(_pendingImageFile!, inputText);
-          _pendingImageFile = null;
-        } else if (_pendingFileBytes != null) {
-          await _logic.processFileWithPrompt(_pendingFileBytes!, _pendingFileName, inputText);
-          _pendingFileBytes = null;
-          _pendingFileName = '';
+      if (attachmentData != null) {
+        if (tempImageFile != null) {
+          if (inputText.isNotEmpty) {
+            await _logic.processImageWithPrompt(tempImageFile, inputText);
+          } else {
+            await _logic.processImageWithAI(tempImageFile);
+          }
+        } else if (fileName != null) {
+          await _logic.processFileWithPrompt(attachmentData, fileName, inputText);
         }
-      } else {
-        // Regular text chat
+      } else if (inputText.isNotEmpty) {
         await _logic.chatWithAI(inputText);
       }
+    } catch (e) {
+      print("Error processing AI request: $e");
+      // Optionally add error message to chat
+      _logic.responses.add(
+        ChatMessage(
+          from: "system",
+          content: "Error processing request: ${e.toString()}",
+        ),
+      );
     } finally {
+      // Always reset generating flag when done
       setState(() {
         _isGenerating = false;
-        _pendingAttachmentType = '';
       });
       _scrollToEnd();
     }
@@ -83,12 +144,138 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
         _pendingImageFile = File(pickedFile.path);
         _pendingFileBytes = null;
         _pendingAttachmentType = 'camera';
-        _logic.responses.add('User: [Image from camera]');
+
       });
       _scrollToEnd();
     }
   }
 
+  Widget _buildAttachmentPreview() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              color: Colors.grey[50],
+              child: Row(
+                children: [
+                  Icon(
+                    _pendingAttachmentType == 'gallery' || _pendingAttachmentType == 'camera'
+                        ? Icons.image
+                        : Icons.attach_file,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _pendingAttachmentType == 'gallery' || _pendingAttachmentType == 'camera'
+                          ? 'Image Attachment'
+                          : _pendingFileName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(50),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(50),
+                      onTap: _removeAttachment,
+                      child: Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: Icon(
+                          Icons.close,
+                          size: 18,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_pendingImageFile != null)
+              Container(
+                constraints: const BoxConstraints(maxHeight: 200),
+                child: Image.file(
+                  _pendingImageFile!,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            if (_pendingFileBytes != null && _pendingAttachmentType == 'file')
+              Container(
+                height: 120,
+                color: Colors.grey[100],
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _getFileIcon(_pendingFileName),
+                        size: 48,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _pendingFileName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+  IconData _getFileIcon(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+
+    switch (extension) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'xls':
+      case 'xlsx':
+        return Icons.table_chart;
+      case 'ppt':
+      case 'pptx':
+        return Icons.slideshow;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return Icons.image;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
   Future<void> _handleGallery() async {
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -99,9 +286,7 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
         _pendingImageFile = File(pickedFile.path);
         _pendingFileBytes = null;
         _pendingAttachmentType = 'gallery';
-        _logic.responses.add('User: [Image from gallery]');
       });
-      _scrollToEnd();
     }
   }
 
@@ -115,7 +300,9 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
           _pendingFileName = file.name;
           _pendingImageFile = null;
           _pendingAttachmentType = 'file';
-          _logic.responses.add('User: [File: ${file.name}]');
+          _logic.responses.add(
+            ChatMessage(from: "user", content: "[File: ${file.name}]"),
+          );
         });
         _scrollToEnd();
       }
@@ -129,11 +316,7 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
       _pendingFileName = '';
       _pendingAttachmentType = '';
 
-      if (_logic.responses.isNotEmpty &&
-          (_logic.responses.last.contains('[Image from') ||
-              _logic.responses.last.contains('[File:'))) {
-        _logic.responses.removeLast();
-      }
+
     });
   }
 
@@ -168,8 +351,12 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
                 _logic.clearQuestions();
                 _logic.clearResponses();
                 _removeAttachment();
-                // Add welcome message
-                _logic.responses.add("Hello! I'm your Study AI assistant. How can I help you today?");
+                _logic.responses.add(
+                  ChatMessage(
+                    from: "ai",
+                    content: "Hello! I'm your Study AI assistant. How can I help you today?",
+                  ),
+                );
               });
             },
           ),
@@ -180,8 +367,12 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
                   _logic.clearQuestions();
                   _logic.clearResponses();
                   _removeAttachment();
-                  // Add welcome message
-                  _logic.responses.add("Hello! I'm your Study AI assistant. How can I help you today?");
+                  _logic.responses.add(
+                    ChatMessage(
+                      from: "ai",
+                      content: "Hello! I'm your Study AI assistant. How can I help you today?",
+                    ),
+                  );
                 });
               }
             },
@@ -215,108 +406,20 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
       ),
       body: Column(
         children: [
-          // Attachment preview area
-          if (_pendingAttachmentType.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(12.0),
-              margin: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  // Attachment preview
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: _pendingImageFile != null
-                        ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        _pendingImageFile!,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                        : Icon(
-                      _pendingAttachmentType == 'file'
-                          ? Icons.insert_drive_file
-                          : Icons.image,
-                      size: 30,
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Attachment info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _pendingFileName.isNotEmpty
-                              ? _pendingFileName
-                              : _pendingAttachmentType == 'camera'
-                              ? 'Camera Photo'
-                              : 'Gallery Image',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Add a message to process this attachment',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Remove button
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: _removeAttachment,
-                    color: Colors.red[400],
-                  ),
-                ],
-              ),
-            ),
-
-          // Chat messages
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               itemCount: _logic.responses.length + (_isGenerating ? 1 : 0),
               itemBuilder: (context, index) {
-                // AI is generating response
                 if (_isGenerating && index == _logic.responses.length) {
                   return _buildAITypingIndicator();
                 }
-
-                // Regular message
-                final response = _logic.responses[index];
-                final isUser = response.startsWith('User: ');
-                final message = isUser ? response.substring(6) : response;
-
-                return _buildMessageBubble(isUser, message);
+                ChatMessage response = _logic.responses[index];
+                return _buildMessageBubble(response);
               },
             ),
           ),
-
-          // Input area with nice shadow
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -332,7 +435,10 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
             child: SafeArea(
               child: Column(
                 children: [
-                  // Input field with attachment buttons
+                  // Attachment preview area
+                  if (_pendingImageFile != null || _pendingFileBytes != null)
+                    _buildAttachmentPreview(),
+                  // Input area
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
@@ -342,7 +448,6 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        // Attachment buttons
                         Row(
                           children: [
                             IconButton(
@@ -368,14 +473,12 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
                             ),
                           ],
                         ),
-
-                        // Text input field
                         Expanded(
                           child: TextField(
                             controller: _inputController,
                             decoration: InputDecoration(
                               hintText: _pendingAttachmentType.isNotEmpty
-                                  ? 'Describe what to do with this attachment...'
+                                  ? 'Add a description for your attachment...'
                                   : 'Ask me anything...',
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.symmetric(
@@ -389,8 +492,6 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
                             onSubmitted: (_) => _submitInput(),
                           ),
                         ),
-
-                        // Send button
                         Padding(
                           padding: const EdgeInsets.only(right: 8.0, bottom: 6.0),
                           child: FloatingActionButton.small(
@@ -402,8 +503,6 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
                       ],
                     ),
                   ),
-
-                  // Powered by label
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
@@ -473,15 +572,11 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
       ),
     );
   }
+  Widget _buildMessageBubble(ChatMessage message) {
+    bool isUser = message.from == "user";
 
-  Widget _buildMessageBubble(bool isUser, String message) {
-    // Handle message content types
-    bool isImageAttachment = message.contains('[Image from');
-    bool isFileAttachment = message.contains('[File:');
-
-    // Display different content based on attachment type
-    if (isImageAttachment && _pendingImageFile != null && _pendingAttachmentType.isNotEmpty) {
-      // Show actual image preview
+    // For messages with image attachments
+    if (message.attachmentBytes != null && message.mime?.startsWith('image') == true) {
       return Align(
         alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
@@ -502,48 +597,33 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
             ],
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
-              // Image preview
               ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Stack(
-                  children: [
-                    Image.file(
-                      _pendingImageFile!,
-                      width: 200,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: GestureDetector(
-                        onTap: _removeAttachment,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(16),
+                  bottom: message.content.isEmpty ? Radius.circular(16) : Radius.zero,
+                ),
+                child: Image.memory(
+                  message.attachmentBytes!,
+                  fit: BoxFit.cover,
                 ),
               ),
-              if (isUser)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4.0, right: 8.0),
+              if (message.content.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.all(12.0),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: isUser ? Theme.of(context).colorScheme.primary : Colors.white,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                  ),
                   child: Text(
-                    'Tap to send with a message',
+                    message.content,
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
+                      color: isUser ? Colors.white : Colors.black,
                     ),
                   ),
                 ),
@@ -551,92 +631,31 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
           ),
         ),
       );
-    } else if (isFileAttachment) {
-      // File attachment
-      String fileName = message.contains('[File:')
-          ? message.split('[File: ')[1].split(']')[0]
-          : 'File';
-
+    }
+    // For text-only messages
+    else {
       return Align(
         alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          padding: const EdgeInsets.all(12.0),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.75,
+          ),
           margin: EdgeInsets.only(
             top: 4.0,
             bottom: 4.0,
             left: isUser ? 60.0 : 0,
             right: isUser ? 0 : 60.0,
           ),
-          decoration: BoxDecoration(
-            color: isUser ? Theme.of(context).colorScheme.primary : Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 5,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.insert_drive_file,
-                color: isUser ? Colors.white : Colors.grey[700],
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  fileName,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: isUser ? Colors.white : Colors.grey[700],
-                  ),
-                ),
-              ),
-              if (_pendingAttachmentType.isNotEmpty && _pendingFileBytes != null)
-                GestureDetector(
-                  onTap: _removeAttachment,
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 8),
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: isUser ? Colors.white24 : Colors.grey[300],
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      size: 16,
-                      color: isUser ? Colors.white : Colors.grey[700],
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      );
-    } else {
-      // Regular text message
-      return Align(
-        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-          margin: EdgeInsets.only(
-            top: 4.0,
-            bottom: 4.0,
-            left: isUser ? 60.0 : 0,
-            right: isUser ? 0 : 60.0,
-          ),
           decoration: BoxDecoration(
             color: isUser
                 ? Theme.of(context).colorScheme.primary
                 : Colors.white,
             borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(16),
-              topRight: const Radius.circular(16),
-              bottomLeft: isUser ? const Radius.circular(16) : Radius.zero,
-              bottomRight: isUser ? Radius.zero : const Radius.circular(16),
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+              bottomRight: isUser ? Radius.zero : Radius.circular(16),
+              bottomLeft: isUser ? Radius.circular(16) : Radius.zero,
             ),
             boxShadow: [
               BoxShadow(
@@ -646,29 +665,22 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
               ),
             ],
           ),
-          child: MarkdownBody(
-            data: message,
+          child: isUser
+              ? Text(
+            message.content,
+            style: const TextStyle(color: Colors.white),
+          )
+              : MarkdownBody(
+            data: message.content,
+            selectable: true,
             styleSheet: MarkdownStyleSheet(
-              p: TextStyle(
-                fontSize: 16.0,
-                color: isUser ? Colors.white : Colors.black,
-              ),
-              h1: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-                color: isUser ? Colors.white : Colors.black,
-              ),
+              p: const TextStyle(fontSize: 14),
               code: TextStyle(
-                backgroundColor: isUser
-                    ? Colors.blue[800]
-                    : Colors.grey[200],
-                color: isUser ? Colors.white : Colors.black87,
                 fontFamily: 'monospace',
+                backgroundColor: Colors.grey[200],
               ),
               codeblockDecoration: BoxDecoration(
-                color: isUser
-                    ? Colors.blue[800]
-                    : Colors.grey[200],
+                color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(8),
               ),
             ),

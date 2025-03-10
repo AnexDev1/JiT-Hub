@@ -1,37 +1,17 @@
+// dart
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:nex_planner/model/chat_message.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class StudyAILogic {
-  File? _image;
-  final List<String> _questions = [];
-  bool isLoading = false;
-  final List<String> _responses = [];
-  String _extractedText = '';
-  final StreamController<String> _streamController = StreamController<String>.broadcast();
 
-  late final GenerativeModel _model;
-  late final ChatSession _chat;
-
-  StudyAILogic() {
-    _initializeAI();
-  }
-
-  Future<void> _initializeAI() async {
-    await dotenv.load(fileName: ".env");
-    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
-
-    _model = GenerativeModel(
-      model: 'gemini-1.5-flash-latest',
-      apiKey: apiKey,
-      systemInstruction: Content.text(
-     '''
+String _prompt = '''
 You are an intelligent and proactive AI assistant on the user's phone. Your goal is to provide helpful, insightful, and dynamic responses to any query, whether through direct reasoning, code generation, using provided context or using available function calls.
 
 Core Directives:
@@ -61,16 +41,58 @@ Time & System Awareness:
 - Adapt responses dynamically to real-world context, schedules, and logical sequences.
 
 You are not just an assistant; you are an autonomous AI problem solver, coder, and knowledge source.
-'''
+''';
+class StudyAILogic {
+  File? _image;
+  final List<String> _questions = [];
+  bool isLoading = false;
+  final List<ChatMessage> _responses = [];
+  String _extractedText = '';
+  final StreamController<String> _streamController = StreamController<String>.broadcast();
+
+  late final GenerativeModel _visonModel;
+  late final GenerativeModel _textModel;
+  late final ChatSession _chat;
+
+  StudyAILogic() {
+    _initializeAI();
+  }
+
+  Future<void> _initializeAI() async {
+    final prefs = await SharedPreferences.getInstance();
+    final apiKey = prefs.getString('study_api_key') ?? '';
+
+    _visonModel = GenerativeModel(
+      model: 'gemini-2.0-flash',
+      apiKey: apiKey,
+      generationConfig: GenerationConfig(
+        temperature: 0.4,
+        topK: 32,
+        topP: 1,
+        maxOutputTokens: 4096,
+      ),
+      systemInstruction: Content('system',[ TextPart(_prompt)]
       ),
     );
-
-    _chat = _model.startChat();
+    _textModel = GenerativeModel(
+      model: 'gemini-2.0-flash',
+      apiKey: apiKey,
+      generationConfig: GenerationConfig(
+        temperature: 1,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 8192,
+        responseMimeType: 'text/plain',
+      ),
+      systemInstruction: Content('system', [
+        TextPart(_prompt) ]),
+    );
+    _chat = _textModel.startChat();
   }
 
   File? get image => _image;
   List<String> get questions => _questions;
-  List<String> get responses => _responses;
+  List<ChatMessage> get responses => _responses;
   String get extractedText => _extractedText;
   Stream<String> get responseStream => _streamController.stream;
 
@@ -111,21 +133,22 @@ You are not just an assistant; you are an autonomous AI problem solver, coder, a
         DataPart('image/jpeg', bytes),
       ]);
 
-      final response = await _model.generateContent([content]);
+      final response = await _visonModel.generateContent([content]);
       final text = response.text;
 
       if (text != null) {
         _extractedText = text;
-        _responses.add(text);
+        _responses.add(ChatMessage(from: "ai", content: text));
         _streamController.add(text);
       }
     } catch (e) {
-      _responses.add("Error processing image: $e");
+      _responses.add(ChatMessage(from: "ai", content: "Error processing image: $e"));
       _streamController.add("Error processing image: $e");
     } finally {
       setState(() => isLoading = false);
     }
   }
+
   Future<void> processImageWithPrompt(File imageFile, String prompt) async {
     setState(() => isLoading = true);
     try {
@@ -136,16 +159,16 @@ You are not just an assistant; you are an autonomous AI problem solver, coder, a
         DataPart('image/jpeg', bytes),
       ]);
 
-      final response = await _model.generateContent([content]);
+      final response = await _textModel.generateContent([content]);
       final text = response.text;
 
       if (text != null) {
         _extractedText = text;
-        _responses.add(text);
+        _responses.add(ChatMessage(from: "ai", content: text));
         _streamController.add(text);
       }
     } catch (e) {
-      _responses.add("Error processing image: $e");
+      _responses.add(ChatMessage(from: "ai", content: "Error processing image: $e"));
       _streamController.add("Error processing image: $e");
     } finally {
       setState(() => isLoading = false);
@@ -155,7 +178,6 @@ You are not just an assistant; you are an autonomous AI problem solver, coder, a
   Future<void> processFileWithPrompt(Uint8List fileBytes, String fileName, String prompt) async {
     setState(() => isLoading = true);
     try {
-      // Determine mime type based on file extension
       String extension = fileName.split('.').last.toLowerCase();
       String mimeType;
       switch (extension) {
@@ -178,27 +200,27 @@ You are not just an assistant; you are an autonomous AI problem solver, coder, a
         DataPart(mimeType, fileBytes),
       ]);
 
-      final response = await _model.generateContent([content]);
+      final response = await _visonModel.generateContent([content]);
       final text = response.text;
 
       if (text != null) {
         _extractedText = text;
-        _responses.add(text);
+        _responses.add(ChatMessage(from: "ai", content: text));
         _streamController.add(text);
       }
     } catch (e) {
-      _responses.add("Error processing file: $e");
+      _responses.add(ChatMessage(from: "ai", content: "Error processing file: $e"));
       _streamController.add("Error processing file: $e");
     } finally {
       setState(() => isLoading = false);
     }
   }
+
   Future<void> processFileWithAI(Uint8List fileBytes, String fileName) async {
     setState(() => isLoading = true);
     try {
       final prompt = "Analyze this document named $fileName. Extract all relevant information and verify its content.";
 
-      // Determine mime type based on file extension
       String extension = fileName.split('.').last.toLowerCase();
       String mimeType;
       switch (extension) {
@@ -221,16 +243,16 @@ You are not just an assistant; you are an autonomous AI problem solver, coder, a
         DataPart(mimeType, fileBytes),
       ]);
 
-      final response = await _model.generateContent([content]);
+      final response = await _visonModel.generateContent([content]);
       final text = response.text;
 
       if (text != null) {
         _extractedText = text;
-        _responses.add(text);
+        _responses.add(ChatMessage(from: "ai", content: text));
         _streamController.add(text);
       }
     } catch (e) {
-      _responses.add("Error processing file: $e");
+      _responses.add(ChatMessage(from: "ai", content: "Error processing file: $e"));
       _streamController.add("Error processing file: $e");
     } finally {
       setState(() => isLoading = false);
@@ -244,11 +266,11 @@ You are not just an assistant; you are an autonomous AI problem solver, coder, a
       final text = response.text;
 
       if (text != null) {
-        _responses.add(text);
+        _responses.add(ChatMessage(from: "ai", content: text));
         _streamController.add(text);
       }
     } catch (e) {
-      _responses.add("Error: $e");
+      _responses.add(ChatMessage(from: "ai", content: "Error: $e"));
       _streamController.add("Error: $e");
     } finally {
       setState(() => isLoading = false);

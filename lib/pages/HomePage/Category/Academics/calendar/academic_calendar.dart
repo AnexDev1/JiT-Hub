@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:nex_planner/pages/Category/Academics/calendar/pdfViewer_page.dart';
+import 'package:nex_planner/pages/HomePage/Category/Academics/calendar/pdfViewer_page.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-
 class AcademicCalendar extends StatefulWidget {
   const AcademicCalendar({super.key});
 

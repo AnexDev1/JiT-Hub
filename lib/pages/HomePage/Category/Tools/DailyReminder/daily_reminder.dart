@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../../../provider/reminder_provider.dart';
+import '../../../../../provider/reminder_provider.dart';
 import 'reminder_modal.dart';
 
 class DailyReminder extends StatelessWidget {

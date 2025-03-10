@@ -1,19 +1,20 @@
-// File: lib/pages/HomePage/category_tab.dart
+// File: lib/pages/HomePage/category_list_tile.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nex_planner/pages/AuthPage/register_page.dart';
-import 'package:nex_planner/pages/Category/category_detail.dart';
 
-class CategoryTab extends StatefulWidget {
+import 'category_list.dart';
+
+class CategoryListTile extends StatefulWidget {
   final List<Item> items;
 
-  const CategoryTab({Key? key, required this.items}) : super(key: key);
+  const CategoryListTile({Key? key, required this.items}) : super(key: key);
 
   @override
   _CategoryTabState createState() => _CategoryTabState();
 }
 
-class _CategoryTabState extends State<CategoryTab> {
+class _CategoryTabState extends State<CategoryListTile> {
   late List<Item> items;
   final List<String> _restrictedTitles = [
     'academic calendar',
@@ -112,7 +113,7 @@ class _CategoryTabState extends State<CategoryTab> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CategoryDetailScreen(categoryName: title),
+        builder: (context) => CategoryList(categoryName: title),
       ),
     );
   }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
-import '../Category/category_detail.dart';
 import 'AppDrawer/app_drawer.dart';
-import 'category_tab.dart';
+import 'Category/category_list.dart';
+import 'Category/category_list_tile.dart';
 import 'gradient_container.dart';
 
 class HomePage extends StatefulWidget {
@@ -270,16 +270,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    CategoryTab(
+                    CategoryListTile(
                       items: _getCategoryItems(0),
                     ),
-                    CategoryTab(
+                    CategoryListTile(
                       items: _getCategoryItems(1),
                     ),
-                    CategoryTab(
+                    CategoryListTile(
                       items: _getCategoryItems(2),
                     ),
-                    CategoryTab(
+                    CategoryListTile(
                       items: _getCategoryItems(3),
                     ),
                   ],
@@ -305,7 +305,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => CategoryDetailScreen(categoryName: item.title),
+                builder: (context) => CategoryList(categoryName: item.title),
               ),
             );
           },

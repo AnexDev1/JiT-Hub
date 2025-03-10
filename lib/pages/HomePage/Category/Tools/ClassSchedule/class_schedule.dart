@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../model/schedule.dart';
-import '../../../../provider/classSchedule_provider.dart';
+
+import '../../../../../model/schedule.dart';
+import '../../../../../provider/classSchedule_provider.dart';
 import 'add_schedule.dart';
 
 class ClassSchedule extends StatefulWidget {

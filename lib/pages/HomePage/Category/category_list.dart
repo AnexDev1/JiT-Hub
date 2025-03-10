@@ -1,17 +1,19 @@
 
 
 import 'package:flutter/material.dart';
-import 'package:nex_planner/pages/Category/Academics/about_jit.dart';
-import 'package:nex_planner/pages/Category/Academics/departments.dart';
-import 'package:nex_planner/pages/Category/Tools/study_ai.dart';
+import 'package:nex_planner/pages/HomePage/Category/Tools/studyAI/api_setup.dart';
+
+import 'Academics/about_jit.dart';
 import 'Academics/calendar/academic_calendar.dart';
-import 'Tools/grade_calculator.dart';
+import 'Academics/departments.dart';
+import 'Tools/gradeCalculator/grade_calculator.dart';
 import 'Tools/ClassSchedule/class_schedule.dart';
 import 'Tools/DailyReminder/daily_reminder.dart';
+import 'Tools/studyAI/study_ai.dart';
 
-class CategoryDetailScreen extends StatelessWidget {
+class CategoryList extends StatelessWidget {
   final String categoryName;
-  const CategoryDetailScreen({super.key, required this.categoryName});
+  const CategoryList({super.key, required this.categoryName});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,7 @@ class CategoryDetailScreen extends StatelessWidget {
       'Grade Calculator': const GradeCalculator(),
       'Class Schedule': const ClassSchedule(),
       'Daily Reminder': const DailyReminder(),
-      'Study AI': const StudyAI(),
+      'Study AI': const ApiSetupPage(),
       // 'Google': const WebViewPage(url: 'https://google.com'),
     };
 
