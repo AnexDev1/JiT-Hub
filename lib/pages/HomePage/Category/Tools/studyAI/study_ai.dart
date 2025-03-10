@@ -42,6 +42,89 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
     );
   }
 
+
+
+  Future<void> _handleCamera() async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      imageQuality: 85,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _pendingImageFile = File(pickedFile.path);
+        _pendingFileBytes = null;
+        _pendingAttachmentType = 'camera';
+
+      });
+      _scrollToEnd();
+    }
+  }
+
+
+  IconData _getFileIcon(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+
+    switch (extension) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'xls':
+      case 'xlsx':
+        return Icons.table_chart;
+      case 'ppt':
+      case 'pptx':
+        return Icons.slideshow;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return Icons.image;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+  Future<void> _handleGallery() async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _pendingImageFile = File(pickedFile.path);
+        _pendingFileBytes = null;
+        _pendingAttachmentType = 'gallery';
+      });
+    }
+  }
+
+  Future<void> _handleFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(withData: true);
+    if (result != null && result.files.isNotEmpty) {
+      final file = result.files.first;
+      if (file.bytes != null) {
+        setState(() {
+          _pendingFileBytes = file.bytes!;
+          _pendingFileName = file.name;
+          _pendingImageFile = null;
+          _pendingAttachmentType = 'file';
+        });
+        _scrollToEnd();
+      }
+    }
+  }
+
+  void _removeAttachment() {
+    setState(() {
+      _pendingImageFile = null;
+      _pendingFileBytes = null;
+      _pendingFileName = '';
+      _pendingAttachmentType = '';
+
+
+    });
+  }
   void _submitInput() async {
     String inputText = _inputController.text.trim();
     if (inputText.isEmpty && _pendingImageFile == null && _pendingFileBytes == null) return;
@@ -133,23 +216,247 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
       _scrollToEnd();
     }
   }
-
-  Future<void> _handleCamera() async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.camera,
-      imageQuality: 85,
-    );
-    if (pickedFile != null) {
-      setState(() {
-        _pendingImageFile = File(pickedFile.path);
-        _pendingFileBytes = null;
-        _pendingAttachmentType = 'camera';
-
-      });
-      _scrollToEnd();
-    }
+  void _scrollToEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
+  void _showAttachmentOptions() {
+    // Get the position and size of the input field container
+    final RenderBox inputBox = context.findRenderObject() as RenderBox;
+    final Offset position = inputBox.localToGlobal(Offset.zero);
+    final Size size = inputBox.size;
 
+    showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+          position.dx + 16, // Offset from left edge
+          position.dy + size.height , // Position BELOW the input field
+          position.dx + 24,
+          position.dy + size.height + 10
+      ),
+      items: [
+        PopupMenuItem<String>(
+          value: 'camera',
+          child: Row(
+            children: [
+              Icon(
+                Icons.camera_alt,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 12),
+              const Text('Camera'),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'gallery',
+          child: Row(
+            children: [
+              Icon(
+                Icons.image,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 12),
+              const Text('Gallery'),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'file',
+          child: Row(
+            children: [
+              Icon(
+                Icons.attach_file,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 12),
+              const Text('File'),
+            ],
+          ),
+        ),
+      ],
+    ).then((String? value) {
+      if (value != null) {
+        switch (value) {
+          case 'camera':
+            _handleCamera();
+            break;
+          case 'gallery':
+            _handleGallery();
+            break;
+          case 'file':
+            _handleFile();
+            break;
+        }
+      }
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: const Text('Study AI'),
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        actions: [
+
+          PopupMenuButton<String>(
+            onSelected: (String value) {
+              if (value == 'Clear') {
+                setState(() {
+                  _logic.clearQuestions();
+                  _logic.clearResponses();
+                  _removeAttachment();
+                  _logic.responses.add(
+                    ChatMessage(
+                      from: "ai",
+                      content: "Hello! I'm your Study AI assistant. How can I help you today?",
+                    ),
+                  );
+                });
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'Clear',
+                  child: ListTile(
+                    leading: Icon(Icons.clear),
+                    title: Text('Clear'),
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Save',
+                  child: ListTile(
+                    leading: Icon(Icons.save),
+                    title: Text('Save'),
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Share',
+                  child: ListTile(
+                    leading: Icon(Icons.share),
+                    title: Text('Share'),
+                  ),
+                ),
+              ];
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              itemCount: _logic.responses.length + (_isGenerating ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (_isGenerating && index == _logic.responses.length) {
+                  return _buildAITypingIndicator();
+                }
+                ChatMessage response = _logic.responses[index];
+                return _buildMessageBubble(response);
+              },
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(12.0),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Attachment preview area
+                  if (_pendingImageFile != null || _pendingFileBytes != null)
+                    _buildAttachmentPreview(),
+                  // Input area
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(24.0),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          children: [
+                            IconButton(
+                              icon:const Icon(Icons.add_circle_outline),
+                              tooltip: 'Take photo',
+                              onPressed: _showAttachmentOptions,
+                              color: Colors.grey[600],
+                              iconSize: 24,
+                            ),
+                          ],
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: _inputController,
+                            decoration: InputDecoration(
+                              hintText: _pendingAttachmentType.isNotEmpty
+                                  ? 'Add your question...'
+                                  : 'Ask me anything...',
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 12.0,
+                              ),
+                            ),
+                            minLines: 1,
+                            maxLines: 5,
+                            textCapitalization: TextCapitalization.sentences,
+                            onSubmitted: (_) => _submitInput(),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0, bottom: 6.0),
+                          child: FloatingActionButton.small(
+                            onPressed: _submitInput,
+                            elevation: 0,
+                            child: const Icon(Icons.send),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Powered by Google Gemini',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
   Widget _buildAttachmentPreview() {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -252,276 +559,6 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
       ),
     );
   }
-  IconData _getFileIcon(String fileName) {
-    final extension = fileName.split('.').last.toLowerCase();
-
-    switch (extension) {
-      case 'pdf':
-        return Icons.picture_as_pdf;
-      case 'doc':
-      case 'docx':
-        return Icons.description;
-      case 'xls':
-      case 'xlsx':
-        return Icons.table_chart;
-      case 'ppt':
-      case 'pptx':
-        return Icons.slideshow;
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-        return Icons.image;
-      default:
-        return Icons.insert_drive_file;
-    }
-  }
-  Future<void> _handleGallery() async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-    );
-    if (pickedFile != null) {
-      setState(() {
-        _pendingImageFile = File(pickedFile.path);
-        _pendingFileBytes = null;
-        _pendingAttachmentType = 'gallery';
-      });
-    }
-  }
-
-  Future<void> _handleFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(withData: true);
-    if (result != null && result.files.isNotEmpty) {
-      final file = result.files.first;
-      if (file.bytes != null) {
-        setState(() {
-          _pendingFileBytes = file.bytes!;
-          _pendingFileName = file.name;
-          _pendingImageFile = null;
-          _pendingAttachmentType = 'file';
-          _logic.responses.add(
-            ChatMessage(from: "user", content: "[File: ${file.name}]"),
-          );
-        });
-        _scrollToEnd();
-      }
-    }
-  }
-
-  void _removeAttachment() {
-    setState(() {
-      _pendingImageFile = null;
-      _pendingFileBytes = null;
-      _pendingFileName = '';
-      _pendingAttachmentType = '';
-
-
-    });
-  }
-
-  void _scrollToEnd() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text('Study AI'),
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'New conversation',
-            onPressed: () {
-              setState(() {
-                _logic.clearQuestions();
-                _logic.clearResponses();
-                _removeAttachment();
-                _logic.responses.add(
-                  ChatMessage(
-                    from: "ai",
-                    content: "Hello! I'm your Study AI assistant. How can I help you today?",
-                  ),
-                );
-              });
-            },
-          ),
-          PopupMenuButton<String>(
-            onSelected: (String value) {
-              if (value == 'Clear') {
-                setState(() {
-                  _logic.clearQuestions();
-                  _logic.clearResponses();
-                  _removeAttachment();
-                  _logic.responses.add(
-                    ChatMessage(
-                      from: "ai",
-                      content: "Hello! I'm your Study AI assistant. How can I help you today?",
-                    ),
-                  );
-                });
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem<String>(
-                  value: 'Clear',
-                  child: ListTile(
-                    leading: Icon(Icons.clear),
-                    title: Text('Clear'),
-                  ),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Save',
-                  child: ListTile(
-                    leading: Icon(Icons.save),
-                    title: Text('Save'),
-                  ),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Share',
-                  child: ListTile(
-                    leading: Icon(Icons.share),
-                    title: Text('Share'),
-                  ),
-                ),
-              ];
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              itemCount: _logic.responses.length + (_isGenerating ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (_isGenerating && index == _logic.responses.length) {
-                  return _buildAITypingIndicator();
-                }
-                ChatMessage response = _logic.responses[index];
-                return _buildMessageBubble(response);
-              },
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -2),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(12.0),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  // Attachment preview area
-                  if (_pendingImageFile != null || _pendingFileBytes != null)
-                    _buildAttachmentPreview(),
-                  // Input area
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(24.0),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.camera_alt),
-                              tooltip: 'Take photo',
-                              onPressed: _handleCamera,
-                              color: Colors.grey[600],
-                              iconSize: 20,
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.image),
-                              tooltip: 'Upload image',
-                              onPressed: _handleGallery,
-                              color: Colors.grey[600],
-                              iconSize: 20,
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.attach_file),
-                              tooltip: 'Attach file',
-                              onPressed: _handleFile,
-                              color: Colors.grey[600],
-                              iconSize: 20,
-                            ),
-                          ],
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: _inputController,
-                            decoration: InputDecoration(
-                              hintText: _pendingAttachmentType.isNotEmpty
-                                  ? 'Add a description for your attachment...'
-                                  : 'Ask me anything...',
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 12.0,
-                              ),
-                            ),
-                            minLines: 1,
-                            maxLines: 5,
-                            textCapitalization: TextCapitalization.sentences,
-                            onSubmitted: (_) => _submitInput(),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8.0, bottom: 6.0),
-                          child: FloatingActionButton.small(
-                            onPressed: _submitInput,
-                            elevation: 0,
-                            child: const Icon(Icons.send),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      'Powered by Google Gemini',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildAITypingIndicator() {
     return Align(
       alignment: Alignment.centerLeft,
@@ -556,7 +593,6 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
       ),
     );
   }
-
   Widget _buildDotAnimation() {
     return DefaultTextStyle(
       style: TextStyle(
@@ -576,63 +612,128 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
     bool isUser = message.from == "user";
 
     // For messages with image attachments
-    if (message.attachmentBytes != null && message.mime?.startsWith('image') == true) {
-      return Align(
-        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          margin: EdgeInsets.only(
-            top: 4.0,
-            bottom: 4.0,
-            left: isUser ? 60.0 : 0,
-            right: isUser ? 0 : 60.0,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 5,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(16),
-                  bottom: message.content.isEmpty ? Radius.circular(16) : Radius.zero,
+    if (message.attachmentBytes != null) {
+      if (message.mime?.startsWith('image') == true) {
+        // Handle images (keep existing code)
+        return Align(
+          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            margin: EdgeInsets.only(
+              top: 4.0,
+              bottom: 4.0,
+              left: isUser ? 60.0 : 0,
+              right: isUser ? 0 : 60.0,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 5,
+                  offset: const Offset(0, 1),
                 ),
-                child: Image.memory(
-                  message.attachmentBytes!,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              if (message.content.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.all(12.0),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: isUser ? Theme.of(context).colorScheme.primary : Colors.white,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
-                    ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(
+                    top: const Radius.circular(16),
+                    bottom: message.content.isEmpty ? const Radius.circular(16) : Radius.zero,
                   ),
-                  child: Text(
-                    message.content,
-                    style: TextStyle(
-                      color: isUser ? Colors.white : Colors.black,
-                    ),
+                  child: Image.memory(
+                    message.attachmentBytes!,
+                    fit: BoxFit.cover,
                   ),
                 ),
-            ],
+                if (message.content.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(12.0),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: isUser ? Theme.of(context).colorScheme.primary : Colors.white,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Text(
+                      message.content,
+                      style: TextStyle(
+                        color: isUser ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        // NEW CODE: Handle non-image files (documents, etc.)
+        return Align(
+          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            margin: EdgeInsets.only(
+              top: 4.0,
+              bottom: 4.0,
+              left: isUser ? 60.0 : 0,
+              right: isUser ? 0 : 60.0,
+            ),
+            decoration: BoxDecoration(
+              color: isUser ? Theme.of(context).colorScheme.primary : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 5,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _getFileIcon(message.fileName ?? 'unknown'),
+                    size: 32,
+                    color: isUser ? Colors.white : Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          message.fileName ?? 'File',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: isUser ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        if (message.content.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              message.content,
+                              style: TextStyle(
+                                color: isUser ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
     }
-    // For text-only messages
+    // For text-only messages (keep existing code)
     else {
       return Align(
         alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -652,10 +753,10 @@ class _StudyAIState extends State<StudyAI> with TickerProviderStateMixin {
                 ? Theme.of(context).colorScheme.primary
                 : Colors.white,
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-              bottomRight: isUser ? Radius.zero : Radius.circular(16),
-              bottomLeft: isUser ? Radius.circular(16) : Radius.zero,
+              topLeft: const Radius.circular(16),
+              topRight: const Radius.circular(16),
+              bottomRight: isUser ? Radius.zero : const Radius.circular(16),
+              bottomLeft: isUser ? const Radius.circular(16) : Radius.zero,
             ),
             boxShadow: [
               BoxShadow(
