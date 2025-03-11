@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nex_planner/pages/AuthPage/api_setup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -127,6 +128,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Future<void> _completeOnboarding() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboardingComplete', true);
-    Navigator.pushReplacementNamed(context, '/register');
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const ApiSetupPage()),
+    );
   }
 }

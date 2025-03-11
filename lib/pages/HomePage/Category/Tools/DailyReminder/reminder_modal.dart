@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nex_planner/model/reminder.dart';
 import '../../../../../provider/reminder_provider.dart';
 
@@ -28,21 +29,25 @@ class _ReminderModalState extends State<ReminderModal> {
   String? _titleError;
   bool _isEditing = false;
 
-  // Category icons and colors mapping
+  // Category icons and colors mapping with academic focus
   final Map<String, IconData> _categoryIcons = {
-    'Assignment': Icons.assignment,
-    'Exam': Icons.quiz,
-    'Study': Icons.menu_book,
-    'Lab Work': Icons.science,
-    'Project': Icons.engineering,
+    'Assignment': Icons.assignment_outlined,
+    'Exam': Icons.quiz_outlined,
+    'Study': Icons.menu_book_outlined,
+    'Lab Work': Icons.science_outlined,
+    'Project': Icons.engineering_outlined,
+    'Lecture': Icons.school_outlined,
+    'Meeting': Icons.groups_outlined,
   };
 
   final Map<String, Color> _categoryColors = {
-    'Assignment': Colors.blue,
-    'Exam': Colors.red,
-    'Study': Colors.green,
-    'Lab Work': Colors.purple,
-    'Project': Colors.orange,
+    'Assignment': Color(0xFF1565C0),
+    'Exam': Color(0xFFC62828),
+    'Study': Color(0xFF2E7D32),
+    'Lab Work': Color(0xFF6A1B9A),
+    'Project': Color(0xFFE65100),
+    'Lecture': Color(0xFF00695C),
+    'Meeting': Color(0xFF4527A0),
   };
 
   @override
@@ -67,265 +72,192 @@ class _ReminderModalState extends State<ReminderModal> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      elevation: 10,
+      backgroundColor: Colors.white,
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Center(
-                child: Text(
-                  _isEditing ? 'Edit Academic Reminder' : 'Create Academic Reminder',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 5),
-              Center(
-                child: Text(
-                  'Plan your academic tasks efficiently',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-              ),
-              const SizedBox(height: 25),
-
-              // Title Field
-              Text(
-                'Title',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[800],
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  hintText: 'e.g., Submit Math Assignment',
-                  errorText: _titleError,
-                  prefixIcon: const Icon(Icons.title),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Description Field
-              Text(
-                'Description (Optional)',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[800],
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _descriptionController,
-                maxLines: 2,
-                decoration: InputDecoration(
-                  hintText: 'Add details about this task...',
-                  prefixIcon: const Icon(Icons.description),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Category Selection
-              Text(
-                'Category',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[800],
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 80,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: _categoryIcons.keys.map((category) =>
-                      _buildCategoryCard(category)
-                  ).toList(),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Date and Time Row
-              Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildHeader(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _buildDateSelector(),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTimeSelector(),
-                  ),
+                  _buildTitleField(),
+                  const SizedBox(height: 20),
+                  _buildDescriptionField(),
+                  const SizedBox(height: 24),
+                  _buildCategorySection(),
+                  const SizedBox(height: 24),
+                  _buildDateTimeSection(),
+                  const SizedBox(height: 24),
+                  _buildReminderToggle(),
+                  const SizedBox(height: 32),
+                  _buildActionButtons(),
                 ],
               ),
-              const SizedBox(height: 20),
-
-              // Reminder toggle
-              _buildReminderToggle(),
-              const SizedBox(height: 30),
-
-              // Action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    ),
-                    child: Text('Cancel', style: TextStyle(color: Colors.grey[800])),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submitForm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                        : Text(
-                      _isEditing ? 'Update Reminder' : 'Add Reminder',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildCategoryCard(String category) {
-    final bool isSelected = _selectedCategory == category;
-    final Color categoryColor = _categoryColors[category] ?? Colors.blue;
+  Widget _buildHeader() {
+    final Color headerColor = _isEditing
+        ? _categoryColors[_selectedCategory]!
+        : Theme.of(context).primaryColor;
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 12.0),
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _selectedCategory = category;
-          });
-        },
-        child: Container(
-          width: 100,
-          decoration: BoxDecoration(
-            color: isSelected ? categoryColor.withOpacity(0.15) : Colors.grey[50],
-            border: Border.all(
-              color: isSelected ? categoryColor : Colors.grey.shade300,
-              width: isSelected ? 2 : 1,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return Container(
+      decoration: BoxDecoration(
+        color: headerColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
               Icon(
-                _categoryIcons[category] ?? Icons.folder,
-                color: isSelected ? categoryColor : Colors.grey[600],
+                _isEditing ? Icons.edit_note : Icons.note_add_outlined,
+                color: Colors.white,
                 size: 28,
               ),
-              const SizedBox(height: 5),
+              const SizedBox(width: 12),
               Text(
-                category,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? categoryColor : Colors.grey[800],
+                _isEditing ? 'Edit Reminder' : 'New Reminder',
+                style: GoogleFonts.inter(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(
+            _isEditing
+                ? 'Update the details of your academic task'
+                : 'Keep track of your important academic deadlines',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: Colors.white.withValues(alpha:0.9),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDateSelector() {
+  Widget _buildTitleField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildFormLabel('Title', Icons.title_outlined),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _titleController,
+          decoration: InputDecoration(
+            hintText: 'e.g., Complete Physics Problem Set',
+            errorText: _titleError,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            filled: true,
+            fillColor: Colors.grey[50],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).primaryColor,
+                width: 2,
+              ),
+            ),
+            prefixIcon: const Icon(Icons.edit_outlined),
+          ),
+          style: GoogleFonts.inter(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDescriptionField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFormLabel('Description', Icons.description_outlined),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _descriptionController,
+          maxLines: 3,
+          decoration: InputDecoration(
+            hintText: 'Additional details about this task...',
+            contentPadding: const EdgeInsets.all(16),
+            filled: true,
+            fillColor: Colors.grey[50],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+            ),
+          ),
+          style: GoogleFonts.inter(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFormLabel(String label, IconData icon) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 18,
+          color: Theme.of(context).primaryColor,
+        ),
+        const SizedBox(width: 8),
         Text(
-          'Date',
-          style: TextStyle(
+          label,
+          style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.grey[800],
           ),
         ),
-        const SizedBox(height: 8),
-        InkWell(
-          onTap: _presentDatePicker,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(12),
-              color: Colors.grey[50],
-            ),
+      ],
+    );
+  }
+
+  Widget _buildCategorySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFormLabel('Category', Icons.category_outlined),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.grey[50],
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             child: Row(
-              children: [
-                Icon(Icons.calendar_today, color: Theme.of(context).primaryColor),
-                const SizedBox(width: 8),
-                Text(
-                  _selectedDate == null
-                      ? 'Select Date'
-                      : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: _selectedDate == null ? Colors.grey[600] : Colors.black,
-                  ),
-                ),
-              ],
+              children: _categoryIcons.keys
+                  .map((category) => _buildCategoryCard(category))
+                  .toList(),
             ),
           ),
         ),
@@ -333,73 +265,66 @@ class _ReminderModalState extends State<ReminderModal> {
     );
   }
 
-  Widget _buildTimeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Time',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey[800],
-          ),
-        ),
-        const SizedBox(height: 8),
-        InkWell(
-          onTap: _presentTimePicker,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(12),
-              color: Colors.grey[50],
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.access_time, color: Theme.of(context).primaryColor),
-                const SizedBox(width: 8),
-                Text(
-                  _selectedTime == null
-                      ? 'Select Time'
-                      : _selectedTime!.format(context),
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: _selectedTime == null ? Colors.grey[600] : Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
+// Modified _buildReminderToggle
   Widget _buildReminderToggle() {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: Colors.grey[50],
-        border: Border.all(color: Colors.grey.shade300),
+        color: _remindMe
+            ? Theme.of(context).primaryColor.withValues(alpha:0.08)
+            : Colors.grey[50],
+        border: Border.all(
+          color: _remindMe
+              ? Theme.of(context).primaryColor.withValues(alpha:0.5)
+              : Colors.grey.shade300,
+        ),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.notifications_active,
-            color: _remindMe ? Theme.of(context).primaryColor : Colors.grey,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            'Remind me',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[800],
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: _remindMe
+                  ? Theme.of(context).primaryColor.withValues(alpha:0.15)
+                  : Colors.grey.shade200,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              _remindMe
+                  ? Icons.notifications_active_outlined
+                  : Icons.notifications_off_outlined,
+              size: 22,
+              color: _remindMe ? Theme.of(context).primaryColor : Colors.grey[600],
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: 12),
+          // Wrap the text with Expanded to allow proper spacing and add overflow settings
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Notification',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[800],
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  _remindMe ? 'You will be notified' : 'No notification',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
           Switch(
             value: _remindMe,
             activeColor: Theme.of(context).primaryColor,
@@ -414,6 +339,252 @@ class _ReminderModalState extends State<ReminderModal> {
     );
   }
 
+  Widget _buildCategoryCard(String category) {
+    final bool isSelected = _selectedCategory == category;
+    final Color categoryColor = _categoryColors[category]!;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 12.0),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectedCategory = category;
+          });
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 92,
+          decoration: BoxDecoration(
+            color: isSelected ? categoryColor.withValues(alpha:0.15) : Colors.white,
+            border: Border.all(
+              color: isSelected ? categoryColor : Colors.grey.shade300,
+              width: isSelected ? 2 : 1,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isSelected
+                ? [
+              BoxShadow(
+                color: categoryColor.withValues(alpha:0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ]
+                : null,
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isSelected ? categoryColor.withValues(alpha:0.2) : Colors.grey.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _categoryIcons[category]!,
+                  color: isSelected ? categoryColor : Colors.grey[600],
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                category,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected ? categoryColor : Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateTimeSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFormLabel('Schedule', Icons.calendar_today_outlined),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildDateSelector(),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildTimeSelector(),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateSelector() {
+    final bool hasDate = _selectedDate != null;
+    final formattedDate = hasDate
+        ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+        : 'Select Date';
+
+    return InkWell(
+      onTap: _presentDatePicker,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: hasDate ? Theme.of(context).primaryColor : Colors.grey.shade300,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          color: hasDate ? Theme.of(context).primaryColor.withValues(alpha:0.05) : Colors.grey[50],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: hasDate
+                    ? Theme.of(context).primaryColor.withValues(alpha:0.15)
+                    : Colors.grey.shade200,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.event_outlined,
+                color: hasDate ? Theme.of(context).primaryColor : Colors.grey[600],
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                formattedDate,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: hasDate ? FontWeight.w500 : FontWeight.normal,
+                  color: hasDate ? Colors.black : Colors.grey[600],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeSelector() {
+    final bool hasTime = _selectedTime != null;
+    final formattedTime = hasTime ? _selectedTime!.format(context) : 'Select Time';
+
+    return InkWell(
+      onTap: _presentTimePicker,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: hasTime ? Theme.of(context).primaryColor : Colors.grey.shade300,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          color: hasTime ? Theme.of(context).primaryColor.withValues(alpha:0.05) : Colors.grey[50],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: hasTime
+                    ? Theme.of(context).primaryColor.withValues(alpha:0.15)
+                    : Colors.grey.shade200,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.access_time_outlined,
+                color: hasTime ? Theme.of(context).primaryColor : Colors.grey[600],
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                formattedTime,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: hasTime ? FontWeight.w500 : FontWeight.normal,
+                  color: hasTime ? Colors.black : Colors.grey[600],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+        Expanded(
+          child: TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.grey.shade300),
+              ),
+            ),
+            child: Text(
+              'CANCEL',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 2,
+          child: ElevatedButton(
+            onPressed: _isSubmitting ? null : _submitForm,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _categoryColors[_selectedCategory],
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: _isSubmitting
+                ? SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
+                : Text(
+              _isEditing ? 'UPDATE REMINDER' : 'SAVE REMINDER',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _presentDatePicker() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -423,7 +594,8 @@ class _ReminderModalState extends State<ReminderModal> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(primary: Theme.of(context).primaryColor),
+            colorScheme: ColorScheme.light(primary: _categoryColors[_selectedCategory]!),
+            dialogBackgroundColor: Colors.white,
           ),
           child: child!,
         );
@@ -443,7 +615,13 @@ class _ReminderModalState extends State<ReminderModal> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(primary: Theme.of(context).primaryColor),
+            colorScheme: ColorScheme.light(primary: _categoryColors[_selectedCategory]!),
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: Colors.white,
+              hourMinuteShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           ),
           child: child!,
         );
@@ -467,14 +645,26 @@ class _ReminderModalState extends State<ReminderModal> {
 
     if (_selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a date')),
+        SnackBar(
+          content: Text(
+            'Please select a date',
+            style: GoogleFonts.inter(),
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
 
     if (_selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a time')),
+        SnackBar(
+          content: Text(
+            'Please select a time',
+            style: GoogleFonts.inter(),
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }

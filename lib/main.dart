@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nex_planner/config.dart';
 import 'package:nex_planner/model/reminder.dart';
 import 'package:nex_planner/model/schedule.dart';
+import 'package:nex_planner/pages/AuthPage/api_setup.dart';
 import 'package:nex_planner/pages/AuthPage/register_page.dart';
 import 'package:nex_planner/pages/HomePage/home_page.dart';
 import 'package:nex_planner/pages/OnboardingPage/onboarding_page.dart';
@@ -46,13 +48,15 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        fontFamily: 'Jost',
+        textTheme: GoogleFonts.interTextTheme(),
+        // Inter is clean, modern and highly readable - perfect for productivity apps
       ),
-      initialRoute: onboardingComplete ? (isLoggedIn ? '/home' : '/register') : '/onboarding',
+      initialRoute: onboardingComplete ? (isLoggedIn ? '/home' : '/apikeySetup') : '/onboarding',
       routes: {
         '/home': (context) => const HomePage(),
         '/register': (context) => const RegisterPage(),
         '/onboarding': (context) => const OnboardingPage(),
+        'apikeySetup': (context) => const ApiSetupPage(),
       },
       home: onboardingComplete ? (isLoggedIn ? const HomePage() : const RegisterPage()) : const OnboardingPage(),
     );

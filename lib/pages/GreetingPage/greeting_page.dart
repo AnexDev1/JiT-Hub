@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:lottie/lottie.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../HomePage/home_page.dart';
 
 class GreetingPage extends StatefulWidget {
   const GreetingPage({super.key});
 
   @override
-  _GreetingPageState createState() => _GreetingPageState();
+  State<GreetingPage> createState() => _GreetingPageState();
 }
 
 class _GreetingPageState extends State<GreetingPage> with SingleTickerProviderStateMixin {
   String _greetingMessage = '';
   bool _isLoading = true;
   bool _hasError = false;
+  Map<String, String> _userData = {};
+  bool _isJimmaStudent = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -23,13 +26,23 @@ class _GreetingPageState extends State<GreetingPage> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      vsync: this,
       duration: const Duration(milliseconds: 800),
+      vsync: this,
     );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
     );
-    _generateGreeting();
+
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+
+    _initialize();
   }
 
   @override
@@ -38,28 +51,47 @@ class _GreetingPageState extends State<GreetingPage> with SingleTickerProviderSt
     super.dispose();
   }
 
+  Future<void> _initialize() async {
+    try {
+      _userData = await _fetchUserData();
+      final university = _userData['university'] ?? '';
+      _isJimmaStudent = university.toLowerCase().contains('jimma');
+
+      if (_isJimmaStudent) {
+        await _generateGreeting();
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        _animationController.forward();
+      }
+    } catch (e) {
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
+      _animationController.forward();
+    }
+  }
+
   Future<Map<String, String>> _fetchUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return {
       'firstName': prefs.getString('firstName') ?? 'User',
-      'middleName': prefs.getString('middleName') ?? '',
-      'department': prefs.getString('department') ?? 'your department',
-      'studentId': prefs.getString('studentID') ?? '',
-      'university': prefs.getString('universityName') ?? 'the university',
+      'lastName': prefs.getString('lastName') ?? '',
+      'department': prefs.getString('department') ?? 'Computer Science',
+      'studentId': prefs.getString('studentID') ?? 'RU1234',
+      'university': prefs.getString('universityName') ?? 'Jimma University',
+      'yearOfStudy': prefs.getString('yearOfStudy') ?? '1st',
     };
   }
 
   Future<void> _generateGreeting() async {
     try {
-      final userData = await _fetchUserData();
-      final firstName = userData['firstName']!;
-      final middleName = userData['middleName']!;
-      final String formattedMiddleName = middleName.isNotEmpty
-          ? ' ${middleName[0].toUpperCase()}${middleName.substring(1).toLowerCase()}'
-          : '';
-      final department = userData['department']!;
-      final studentId = userData['studentId']!;
-      final university = userData['university']!.toLowerCase();
+      final firstName = _userData['firstName']!;
+      final department = _userData['department']!;
+      final studentId = _userData['studentId']!;
+      final yearOfStudy = _userData['yearOfStudy']!;
 
       final String studentType = studentId.startsWith('EU')
           ? 'extension student'
@@ -68,21 +100,23 @@ class _GreetingPageState extends State<GreetingPage> with SingleTickerProviderSt
           : 'student';
 
       final prompt = '''
-Create a warm, personalized greeting for a university student.
-Name: $firstName$formattedMiddleName
-University: $university
-Department: $department
-Student ID: $studentId
-Student Type: $studentType
-If user is not from jimma university , the model should tell them that its aware that they are not from jimma university. but it will still let them use the app.
-   
-Format the message with Markdown for better visual appeal. Include:
-1. A friendly greeting with their name
-2. Welcome to their university
-3. Positive comments about their specific department
-4. Motivational message based on their student type (extension/regular)
-5. Use 2-3 appropriate emojis
-6. Keep it concise but warm (3-4 paragraphs maximum)
+Create a brief, personalized welcome message for a Jimma University student with the following details:
+
+STUDENT INFO:
+- First Name: $firstName
+- Department: $department
+- Student Type: $studentType
+- Year of Study: $yearOfStudy
+
+REQUIREMENTS:
+1. Begin with "## Welcome to Jimma University, $firstName!"
+2. One short paragraph (2-3 sentences) about their specific department at Jimma University
+3. One brief sentence of encouragement specific to their field
+4. End with a short call to action to explore the app features
+5. Include exactly ONE emoji that relates to education/academics
+6. Keep the entire message under 100 words
+7. Professional yet friendly tone
+8. Format using markdown
 ''';
 
       await _sendRequestToAI(prompt);
@@ -91,6 +125,7 @@ Format the message with Markdown for better visual appeal. Include:
         _hasError = true;
         _isLoading = false;
       });
+      _animationController.forward();
     }
   }
 
@@ -108,13 +143,13 @@ Format the message with Markdown for better visual appeal. Include:
         _greetingMessage = output;
         _isLoading = false;
       });
-
       _animationController.forward();
     } catch (e) {
       setState(() {
         _hasError = true;
         _isLoading = false;
       });
+      _animationController.forward();
     }
   }
 
@@ -123,63 +158,179 @@ Format the message with Markdown for better visual appeal. Include:
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => const HomePage(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOutCubic;
-          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          var offsetAnimation = animation.drive(tween);
-          return SlideTransition(position: offsetAnimation, child: child);
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
         },
-        transitionDuration: const Duration(milliseconds: 500),
+        transitionDuration: const Duration(milliseconds: 400),
       ),
     );
-  }
-
-  void _retryGreeting() {
-    setState(() {
-      _hasError = false;
-      _isLoading = true;
-    });
-    _generateGreeting();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF6A11CB),
-              Color(0xFF2575FC),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          // Gradient background element
+          Positioned(
+            top: -120,
+            right: -100,
             child: Container(
-              constraints: BoxConstraints(
-                maxWidth: 600,
-                maxHeight: MediaQuery.of(context).size.height * 0.85,
-              ),
-              margin: const EdgeInsets.symmetric(horizontal: 20.0),
+              height: 250,
+              width: 250,
               decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFF6366F1).withValues(alpha:0.2),
+                    const Color(0xFF6366F1).withValues(alpha:0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          Positioned(
+            bottom: -80,
+            left: -60,
+            child: Container(
+              height: 180,
+              width: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFF8B5CF6).withValues(alpha:0.15),
+                    const Color(0xFF8B5CF6).withValues(alpha:0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Main content
+          _isLoading
+              ? _buildLoadingState()
+              : _hasError
+              ? _buildErrorState()
+              : _buildContent(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+                    color: Colors.black.withValues(alpha:0.05),
+                    blurRadius: 15,
+                    spreadRadius: 1,
+                  )
+                ]
+            ),
+            child: const SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6366F1)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            _isJimmaStudent
+                ? "Preparing your welcome message..."
+                : "Getting things ready...",
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              color: Colors.black54,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Center(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEE2E2),
+                    borderRadius: BorderRadius.circular(100),
                   ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: _buildContent(),
-              ),
+                  child: const Icon(
+                    Icons.wifi_off_rounded,
+                    color: Color(0xFFDC2626),
+                    size: 36,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  'Connection Issue',
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Could not connect to our servers. Please check your connection.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    color: Colors.black54,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                _buildPrimaryButton('Try Again', _initialize),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: _goToHome,
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.black54,
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Skip',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward, size: 16),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -188,213 +339,444 @@ Format the message with Markdown for better visual appeal. Include:
   }
 
   Widget _buildContent() {
-    if (_isLoading) {
-      return _buildLoadingState();
-    } else if (_hasError) {
-      return _buildErrorState();
-    } else {
-      return _buildGreetingContent();
-    }
+    final firstName = _userData['firstName'] ?? 'User';
+
+    return SingleChildScrollView(
+      child: SafeArea(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // App logo bar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha:0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.calendar_month_rounded,
+                        color: Color(0xFF6366F1),
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      "JIT Hub",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // Greeting banner with profile
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF6366F1).withValues(alpha:0.2),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha:0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.white,
+                        child: Text(
+                          _getInitials(),
+                          style: GoogleFonts.poppins(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF6366F1),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Hello, $firstName',
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'Welcome to JIT Hub',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withValues(alpha:0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Main content section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _isJimmaStudent
+                    ? _buildJimmaWelcomeCard()
+                    : _buildFeaturesList(),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Continue button
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: _buildPrimaryButton('Continue to Dashboard', _goToHome),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
-  Widget _buildLoadingState() {
+  String _getInitials() {
+    String initials = '';
+    if (_userData['firstName']?.isNotEmpty == true) {
+      initials += _userData['firstName']![0].toUpperCase();
+    }
+    if (_userData['lastName']?.isNotEmpty == true) {
+      initials += _userData['lastName']![0].toUpperCase();
+    }
+    return initials.isEmpty ? 'U' : initials;
+  }
+
+  Widget _buildJimmaWelcomeCard() {
+    final department = _userData['department'] ?? 'your department';
+    final yearOfStudy = _userData['yearOfStudy'] ?? '';
+
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Lottie.network(
-          'https://assets10.lottiefiles.com/packages/lf20_bujdzzfn.json',
-          width: 200,
-          height: 200,
+        // User academic info
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Wrap(
+            spacing: 8, // horizontal spacing
+            runSpacing: 8, // vertical spacing between wrapped lines
+            children: [
+              _buildInfoChip(
+                label: department,
+                icon: Icons.school_rounded,
+              ),
+              _buildInfoChip(
+                label: '$yearOfStudy Year Student',
+                icon: Icons.calendar_today_rounded,
+              ),
+            ],
+          ),
         ),
+
         const SizedBox(height: 24),
-        const Text(
-          'Preparing your personalized welcome...',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF6A11CB),
+
+        // AI welcome message
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha:0.04),
+                blurRadius: 15,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8EAFF),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.psychology,
+                      size: 18,
+                      color: Color(0xFF6366F1),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Personalized Welcome',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              MarkdownBody(
+                data: _greetingMessage,
+                styleSheet: MarkdownStyleSheet.fromTheme(
+                  ThemeData(
+                    textTheme: TextTheme(
+                      headlineSmall: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                        height: 1.4,
+                      ),
+                      bodyMedium: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: Colors.black87,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ).copyWith(
+                  h2: GoogleFonts.poppins(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF6366F1),
+                    height: 1.4,
+                  ),
+                  p: GoogleFonts.poppins(
+                    fontSize: 15,
+                    color: Colors.black87,
+                    height: 1.5,
+                  ),
+                  blockquoteDecoration: BoxDecoration(
+                    color: const Color(0xFFE8EAFF),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: const Color(0xFF6366F1).withValues(alpha:0.2),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                selectable: true,
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildErrorState() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildInfoChip({required String label, required IconData icon}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8EAFF),
+        borderRadius: BorderRadius.circular(50),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min, // Keep this to ensure the chip is as small as possible
         children: [
           Icon(
-            Icons.error_outline_rounded,
-            size: 80,
-            color: Colors.red[300],
+            icon,
+            size: 16,
+            color: const Color(0xFF6366F1),
           ),
-          const SizedBox(height: 16),
-          const Text(
-            'Oops! Something went wrong',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'We couldn\'t generate your welcome message.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.black54),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _retryGreeting,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6A11CB),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          const SizedBox(width: 6),
+          Flexible( // Added Flexible to allow text wrapping
+            child: Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF6366F1),
               ),
+              overflow: TextOverflow.ellipsis, // Shows ellipsis for very long text
             ),
-            child: const Text('Try Again'),
-          ),
-          TextButton(
-            onPressed: _goToHome,
-            child: const Text('Skip to Home'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGreetingContent() {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: Column(
+  Widget _buildFeaturesList() {
+    final features = [
+      {
+        'icon': Icons.calendar_today_rounded,
+        'title': 'Academic Calendar',
+        'description': 'Track important dates and events',
+      },
+      {
+        'icon': Icons.book_outlined,
+        'title': 'Course Materials',
+        'description': 'Access your study resources',
+      },
+      {
+        'icon': Icons.notifications_outlined,
+        'title': 'Smart Reminders',
+        'description': 'Never miss important deadlines',
+      },
+      {
+        'icon': Icons.timer_outlined,
+        'title': 'Study Planner',
+        'description': 'Organize your academic schedule',
+      },
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            'Discover Key Features',
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        ...List.generate(
+          features.length,
+              (index) => Padding(
+            padding: EdgeInsets.only(bottom: index < features.length - 1 ? 16 : 0),
+            child: _buildFeatureItem(
+              icon: features[index]['icon'] as IconData,
+              title: features[index]['title'] as String,
+              description: features[index]['description'] as String,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureItem({
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha:0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
         children: [
-          // Header decoration
           Container(
-            height: 6,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-          ),
-
-          // Content
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 32.0,
-              ),
-              child: Column(
-                children: [
-                  // Welcome icon
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6A11CB).withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.school_rounded,
-                      size: 40,
-                      color: Color(0xFF6A11CB),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Welcome message
-                  MarkdownBody(
-                    data: _greetingMessage,
-                    styleSheet: MarkdownStyleSheet(
-                      h1: const TextStyle(
-                        fontSize: 24,
-                        height: 1.5,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF6A11CB),
-                      ),
-                      h2: const TextStyle(
-                        fontSize: 20,
-                        height: 1.5,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2575FC),
-                      ),
-                      p: const TextStyle(
-                        fontSize: 16,
-                        height: 1.6,
-                        color: Colors.black87,
-                      ),
-                      strong: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      em: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey[800],
-                      ),
-                      blockquote: const TextStyle(
-                        fontSize: 16,
-                        height: 1.5,
-                        fontStyle: FontStyle.italic,
-                        color: Color(0xFF6A11CB),
-                      ),
-                      blockquoteDecoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: const Color(0xFF6A11CB).withOpacity(0.5),
-                            width: 4.0,
-                          ),
-                        ),
-                        color: const Color(0xFF6A11CB).withOpacity(0.05),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Footer button
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  offset: const Offset(0, -2),
-                  blurRadius: 6,
+              color: const Color(0xFFE8EAFF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              size: 22,
+              color: const Color(0xFF6366F1),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
                 ),
               ],
             ),
-            child: ElevatedButton(
-              onPressed: _goToHome,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6A11CB),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'Continue to Home',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPrimaryButton(String text, VoidCallback onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF6366F1),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          elevation: 0,
+        ),
+        child: Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:ionicons/ionicons.dart';
 import 'package:nex_planner/pages/GreetingPage/greeting_page.dart';
 import '../../services/generative_ai_service.dart';
 import '../HomePage/home_page.dart';
@@ -28,7 +30,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _loadApiKey() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String apiKey = prefs.getString('apikey') ?? '';
+      String apiKey = prefs.getString('study_api_key') ?? '';
 
       setState(() {
         _apiKey = apiKey;
@@ -55,7 +57,6 @@ class _RegisterPageState extends State<RegisterPage> {
         _isAIInitialized = _aiService?.isInitialized ?? false;
         _isProcessing = false;
       });
-
     } catch (e) {
       setState(() {
         _isAIInitialized = false;
@@ -67,14 +68,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> _captureAndProcessImage(BuildContext context) async {
     if (_apiKey == null || _apiKey!.isEmpty) {
-      _showApiKeyDialog();
       return;
     }
 
     if (!_isAIInitialized) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('AI service not initialized. Check your API key.')),
-      );
+      _showErrorSnackBar('AI service not initialized. Check your API key.');
       return;
     }
 
@@ -114,66 +112,33 @@ class _RegisterPageState extends State<RegisterPage> {
           MaterialPageRoute(builder: (context) => const GreetingPage()),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(idInfo['reasoning']),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
+        _showErrorSnackBar(idInfo['reasoning']);
       }
     } catch (e) {
       setState(() => _isProcessing = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
+      _showErrorSnackBar('Error: ${e.toString()}');
     }
   }
 
-  void _showApiKeyDialog() {
-    final TextEditingController apiKeyController = TextEditingController(text: _apiKey);
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Enter Google Gemini API Key'),
-          content: TextField(
-            controller: apiKeyController,
-            decoration: const InputDecoration(
-              hintText: 'Paste your API key here',
-            ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                String apiKey = apiKeyController.text.trim();
-                if (apiKey.isNotEmpty) {
-                  Navigator.of(context).pop();
-                  await _saveApiKey(apiKey);
-                  await _initializeAI(apiKey);
-                }
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
+        ),
+        backgroundColor: Colors.red.shade700,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(12),
+        duration: const Duration(seconds: 5),
+      ),
     );
-  }
-
-  Future<void> _saveApiKey(String apiKey) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('apikey', apiKey);
-    setState(() {
-      _apiKey = apiKey;
-    });
   }
 
   Future<void> _loginAsGuest(BuildContext context) async {
@@ -190,148 +155,392 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> restrictedItems = [
       {
-        'icon': Icons.calendar_today,
+        'icon': Ionicons.calendar_outline,
         'title': 'Academic Calendar',
         'subtitle': 'Details about academic schedules',
+        'color': const Color(0xFF6366F1),
       },
       {
-        'icon': Icons.local_cafe,
+        'icon': Ionicons.cafe_outline,
         'title': 'Cafe Menu',
         'subtitle': 'Exclusive cafe offers',
+        'color': Colors.amber.shade700,
       },
       {
-        'icon': Icons.computer,
+        'icon': Ionicons.laptop_outline,
         'title': 'Study AI',
         'subtitle': 'Access to AI study tools',
+        'color': Colors.teal,
       },
       {
-        'icon': Icons.schedule,
+        'icon': Ionicons.time_outline,
         'title': 'Class Schedule',
         'subtitle': 'Personalized class timings',
+        'color': Colors.purple,
       },
       {
-        'icon': Icons.photo_album,
+        'icon': Ionicons.images_outline,
         'title': 'Gallery',
         'subtitle': 'Access to exclusive gallery content',
+        'color': Colors.blue.shade600,
       },
       {
-        'icon': Icons.account_balance,
+        'icon': Ionicons.book_outline,
         'title': 'Religious',
         'subtitle': 'Details about religious events',
+        'color': Colors.green.shade600,
       },
     ];
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
-        title: const Text('Student Verification'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: _showApiKeyDialog,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+      ),
+      body: _isProcessing
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              height: 50,
+              width: 50,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Color(0xFF6366F1),
+                ),
+                strokeWidth: 3,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Processing...',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[800],
+              ),
+            ),
+          ],
+        ),
+      )
+          : SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                       Center(
+                        child: SizedBox(
+                          height: 220,
+                          width: 220,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Outer animated circle
+                              TweenAnimationBuilder<double>(
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                duration: const Duration(seconds: 2),
+                                curve: Curves.easeInOut,
+                                builder: (context, value, child) {
+                                  return Container(
+                                    height: 220 * value,
+                                    width: 220 * value,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: RadialGradient(
+                                        colors: [
+                                          const Color(0xFF6366F1).withValues(alpha:0.7),
+                                          const Color(0xFF6366F1).withValues(alpha:0.0),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              // Middle circle with background
+                              Container(
+                                height: 180,
+                                width: 180,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Color(0xFF6366F1),
+                                      Color(0xFF8B5CF6),
+                                    ],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF6366F1).withValues(alpha:0.3),
+                                      blurRadius: 20,
+                                      spreadRadius: 5,
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: TweenAnimationBuilder<double>(
+                                    tween: Tween(begin: 0.0, end: 1.0),
+                                    duration: const Duration(seconds: 1),
+                                    curve: Curves.elasticOut,
+                                    builder: (context, value, child) {
+                                      return Transform.scale(
+                                        scale: value,
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Icon(
+                                              Ionicons.shield_outline,
+                                              size: 90,
+                                              color: Colors.white.withValues(alpha:0.3),
+                                            ),
+                                            const Icon(
+                                              Ionicons.school_outline,
+                                              size: 45,
+                                              color: Colors.white,
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+
+                              // Rotating outer circle decoration
+                              TweenAnimationBuilder<double>(
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                duration: const Duration(seconds: 20),
+                                curve: Curves.linear,
+                                builder: (context, value, child) {
+                                  return Transform.rotate(
+                                    angle: value * 2 * 3.14159,
+                                    child: Container(
+                                      width: 210,
+                                      height: 210,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white.withValues(alpha:0.2),
+                                          width: 1.5,
+                                          strokeAlign: BorderSide.strokeAlignOutside,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+
+                      // Title and subtitle
+                      Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Verify ID for Full Access',
+                              style: GoogleFonts.poppins(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Complete the verification process for exclusive features',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                                height: 1.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Restricted items section
+                      Text(
+                        'Premium Features',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Grid of restricted items
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 1.4,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
+                        itemCount: restrictedItems.length,
+                        itemBuilder: (context, index) {
+                          final item = restrictedItems[index];
+                          return _buildFeatureCard(
+                            icon: item['icon'],
+                            title: item['title'],
+                            subtitle: item['subtitle'],
+                            color: item['color'],
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Bottom Buttons
+            Container(
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha:0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => _captureAndProcessImage(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6366F1),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      elevation: 0,
+                      minimumSize: const Size(double.infinity, 54),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Ionicons.scan_outline, size: 20),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Scan Student ID',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => _loginAsGuest(context),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.grey[700],
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      minimumSize: const Size(double.infinity, 0),
+                    ),
+                    child: Text(
+                      'Continue as Guest',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeatureCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha:0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      body: _isProcessing
-          ? const Center(child: CircularProgressIndicator())
-          : Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Image.asset(
-                'lib/assets/verification.jpeg',
-                height: 300,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Verify ID for Full Access',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Complete the process in just a few steps to verify your profile',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: restrictedItems.length,
-                  itemBuilder: (context, index) {
-                    final item = restrictedItems[index];
-                    return ListTile(
-                      leading: Icon(item['icon']),
-                      title: Text(item['title']),
-                      subtitle: Text(item['subtitle']),
-                    );
-                  },
-                ),
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => _captureAndProcessImage(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                          Theme.of(context).colorScheme.secondary,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Jost',
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                        ),
-                        child: const Text(
-                          'Scan ID',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => _loginAsGuest(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Jost',
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                        ),
-                        child: const Text(
-                          'Login as Guest',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha:0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: 18,
+              color: color,
+            ),
           ),
-        ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              color: Colors.grey[600],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

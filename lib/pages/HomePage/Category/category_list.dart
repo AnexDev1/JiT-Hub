@@ -1,7 +1,7 @@
 
 
 import 'package:flutter/material.dart';
-import 'package:nex_planner/pages/HomePage/Category/Tools/studyAI/api_setup.dart';
+import 'package:nex_planner/pages/HomePage/Category/campus_services/cafe_menu.dart';
 
 import 'Academics/about_jit.dart';
 import 'Academics/calendar/academic_calendar.dart';
@@ -18,9 +18,6 @@ class CategoryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text(categoryName),
-      // ),
       body: _buildContent(),
     );
   }
@@ -33,8 +30,8 @@ class CategoryList extends StatelessWidget {
       'Grade Calculator': const GradeCalculator(),
       'Class Schedule': const ClassSchedule(),
       'Daily Reminder': const DailyReminder(),
-      'Study AI': const ApiSetupPage(),
-      // 'Google': const WebViewPage(url: 'https://google.com'),
+      'Study AI': const StudyAI(),
+      'Cafe Menu': const CafeMenu(),
     };
 
     return categoryWidgets[categoryName] ??
