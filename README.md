@@ -1,69 +1,43 @@
-# Nex Planner
+# JIT Hub
 
-Nex Planner is a simple mobile app designed to help you track all college-related tasks. This app can be used as a reminder for upcoming tests, assignments, or other notes.
+Jit Hub is a mobile app designed to help students manage all college-related tasks and campus navigation needs. It serves as a reminder for upcoming tests, assignments, and notes while providing an intuitive, location-based experience using maps and real-time notifications.
 
 ## Features
 
-- Track and manage college-related tasks
-- Set reminders for upcoming tests and assignments
-- Add and edit notes
-- Perform OCR on images to generate study questions
-- Generate exam-like questions using AI
+- **Task Management:** Create, update, and delete tasks or reminders.
+- **Campus Navigation:** Locate buildings and services on campus using interactive maps.
+- **Polylines for Navigation:** Generate routes using Mapbox directions with a loading indicator.
+- **Real-time Notifications:** Stay informed with alerts about tasks and upcoming deadlines.
+- **Search & Filter:** Quickly search through campus locations and tasks by category.
+- **Data Persistence:** Store data locally using Hive for offline access.
+- **PDF Viewing:** Open and view academic calendars, syllabi, and other documents.
+- **Image Picking:** Select images for tasks or profile customization.
+- **Markdown Rendering:** Render formatted text with flutter_markdown.
+- **AI Integration:** Enhance features using Google Generative AI.
+- **Animated UI:** Enjoy smooth UI animations with animated_text_kit and flutter_animate.
+- **Modern UI/UX:** Built with Flutter, Google Fonts, Ionicons, and flutter_native_splash for a polished experience.
+- **Cross-Platform Support:** Uses Kotlin, C, C++, Java, and Gradle where needed for native functionalities.
 
-## Installation
+## Built With
 
-1. **Clone the repository:**
+- [Flutter](https://flutter.dev/) & [Dart](https://dart.dev/)
+- [Hive](https://pub.dev/packages/hive) & [Hive Flutter](https://pub.dev/packages/hive_flutter)
+- [geolocator](https://pub.dev/packages/geolocator)
+- [flutter_map](https://pub.dev/packages/flutter_map) & [latlong2](https://pub.dev/packages/latlong2)
+- [http](https://pub.dev/packages/http)
+- [Mapbox Directions API](https://docs.mapbox.com/api/navigation/directions/)
+- Additional dependencies: cupertino_icons, flutter_svg, shared_preferences, intl, provider, flutter_pdfview, image_picker, flutter_dotenv, flutter_markdown, flutter_native_splash, google_generative_ai, file_picker, animated_text_kit, timezone, url_launcher, google_fonts, ionicons, and flutter_animate.
 
+## Getting Started
+
+### Prerequisites
+
+- Flutter SDK (see [Flutter installation guide](https://flutter.dev/docs/get-started/install))
+- A valid Mapbox access token (replace `YOUR_MAPBOX_ACCESS_TOKEN` in the code)
+
+### Installation
+
+1. Clone the repository:
    ```bash
    git clone https://github.com/AnexDev1/nex_planner.git
    cd nex_planner
-   
-    ```
-2. **Install dependencies:**
-3. **Set up the environment:**
-    - Create a `.env` file in the root directory and add your API key:
-
-  ```bash
-GEMINI_API_KEY=your_api_key_here 
-```
-4. **Run the app:**
-
-## Usage
-
-**Add a new note:**
-
-1. Open the app and click on the "Add Note" button.
-2. Enter the title and description of the note.
-3. Save the note.
-
-**Edit or delete a note:**
-
-1. Click on the note you want to edit or delete.
-2. Use the edit or delete buttons to modify or remove the note.
-
-**Generate study questions:**
-
-1. Click on the "Study AI" button.
-2. Pick an image from your gallery.
-3. The app will perform OCR on the image and generate study questions.
-
-## Contributing
-
-Contributions are welcome! Please follow these steps to contribute:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/your-feature-name`).
-3. Make your changes.
-4. Commit your changes (`git commit -m 'Add some feature'`).
-5. Push to the branch (`git push origin feature/your-feature-name`).
-6. Open apull request.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-If you have any questions or suggestions, feel free to contact me:
-
-- GitHub: [AnexDev1](https://github.com/AnexDev1)
