@@ -440,6 +440,21 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
 
   Widget _buildLocationDetails() {
     final location = _selectedLocation!;
+    String distanceText = "";
+    if(_userLocation != null){
+      double distanceInMeters = Geolocator.distanceBetween(
+        _userLocation!.latitude,
+        _userLocation!.longitude,
+        location.position.latitude,
+        location.position.longitude
+      );
+      if(distanceInMeters < 1000){
+        distanceText = "${distanceInMeters.toStringAsFixed(0)} m";
+      } else {
+        double distanceInKm = distanceInMeters / 1000;
+        distanceText = "${distanceInKm.toStringAsFixed(2)} km";
+      }
+    }
     return Positioned(
       left: 16,
       right: 16,
@@ -494,6 +509,15 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
                           color: Colors.grey[600],
                         ),
                       ),
+                      if (distanceText.isNotEmpty)
+                        Text(
+                          "Distance: $distanceText",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+
+                        )
                     ],
                   ),
                 ),
