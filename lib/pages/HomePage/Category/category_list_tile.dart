@@ -20,7 +20,6 @@ class _CategoryTabState extends State<CategoryListTile> with SingleTickerProvide
   final List<String> _restrictedTitles = [
     'academic calendar',
     'cafe menu',
-    'study ai',
     'class schedule',
     'gallery',
     'religious'

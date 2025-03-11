@@ -85,13 +85,26 @@ class _GreetingPageState extends State<GreetingPage> with SingleTickerProviderSt
       'yearOfStudy': prefs.getString('yearOfStudy') ?? '1st',
     };
   }
-
+String? _computedYear;
   Future<void> _generateGreeting() async {
     try {
       final firstName = _userData['firstName']!;
       final department = _userData['department']!;
       final studentId = _userData['studentId']!;
-      final yearOfStudy = _userData['yearOfStudy']!;
+      _computedYear = _userData['yearOfStudy']!;
+
+      final regExp = RegExp(r'\/(\d+)$');
+      final match = regExp.firstMatch(studentId);
+      if (match != null) {
+        final ethiopianYear = int.tryParse(match.group(1)!);
+        if (ethiopianYear != null) {
+          final currentYear = DateTime.now().year;
+          // Deduct 8 years from current year to adjust for the Ethiopian calendar difference.
+          final adjustedCurrentYear = currentYear - 8;
+          final studyYear = adjustedCurrentYear - ethiopianYear + 1;
+          _computedYear = '$studyYear';
+        }
+      }
 
       final String studentType = studentId.startsWith('EU')
           ? 'extension student'
@@ -106,17 +119,20 @@ STUDENT INFO:
 - First Name: $firstName
 - Department: $department
 - Student Type: $studentType
-- Year of Study: $yearOfStudy
+- Year of Study: $_computedYear
 
 REQUIREMENTS:
 1. Begin with "## Welcome to Jimma University, $firstName!"
-2. One short paragraph (2-3 sentences) about their specific department at Jimma University
-3. One brief sentence of encouragement specific to their field
-4. End with a short call to action to explore the app features
-5. Include exactly ONE emoji that relates to education/academics
-6. Keep the entire message under 100 words
-7. Professional yet friendly tone
-8. Format using markdown
+2. One short paragraph (2-3 sentences) about their specific department at Jimma University.
+3. One brief sentence of encouragement specific to their field.
+4. End with a short call to action to explore the app features.
+5. Include exactly ONE emoji that relates to education/academics.
+6. Keep the entire message under 100 words.
+7. Professional yet friendly tone.
+8. Format using markdown.
+9. Use emojis where appropriate.
+10. No spelling or grammatical errors.
+11. The number after the last "/" in the student ID is the registration year in the Ethiopian calendar.
 ''';
 
       await _sendRequestToAI(prompt);
@@ -492,7 +508,7 @@ REQUIREMENTS:
 
   Widget _buildJimmaWelcomeCard() {
     final department = _userData['department'] ?? 'your department';
-    final yearOfStudy = _userData['yearOfStudy'] ?? '';
+    final yearOfStudy = _computedYear ?? '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

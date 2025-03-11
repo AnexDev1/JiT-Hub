@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         textTheme: GoogleFonts.interTextTheme(),
-        // Inter is clean, modern and highly readable - perfect for productivity apps
+
       ),
       initialRoute: onboardingComplete ? (isLoggedIn ? '/home' : '/apikeySetup') : '/onboarding',
       routes: {
