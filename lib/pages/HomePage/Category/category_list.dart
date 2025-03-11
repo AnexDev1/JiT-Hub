@@ -1,11 +1,11 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:nex_planner/pages/HomePage/Category/campus_services/cafe_menu.dart';
+import 'package:nex_planner/pages/HomePage/Category/campus_services/campus_navigation_page.dart';
 
 import 'Academics/about_jit.dart';
 import 'Academics/calendar/academic_calendar.dart';
 import 'Academics/departments.dart';
+import 'Campus_life/religious_page.dart';
 import 'Tools/gradeCalculator/grade_calculator.dart';
 import 'Tools/ClassSchedule/class_schedule.dart';
 import 'Tools/DailyReminder/daily_reminder.dart';
@@ -32,6 +32,8 @@ class CategoryList extends StatelessWidget {
       'Daily Reminder': const DailyReminder(),
       'Study AI': const StudyAI(),
       'Cafe Menu': const CafeMenu(),
+      'Religious': const ReligiousPage(),
+      'Campus Navigation': CampusNavigationPage(),
     };
 
     return categoryWidgets[categoryName] ??

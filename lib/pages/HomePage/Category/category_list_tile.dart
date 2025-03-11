@@ -233,6 +233,7 @@ class _CategoryTabState extends State<CategoryListTile> with SingleTickerProvide
       'Daily Reminder': 'Reminders for tasks & assignments',
       'Study AI': 'AI-powered study assistance',
       'Cafe Menu': 'University cafeteria menu',
+      'Campus Navigation': ' Navigate inside the campus ',
       'Gallery': 'Campus photos and university events',
       'Religious': 'Religious services and information',
     };

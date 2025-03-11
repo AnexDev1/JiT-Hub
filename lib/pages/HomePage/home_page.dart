@@ -113,6 +113,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             title: 'Cafe Menu',
             description: 'Read menu for students cafe.',
           ),
+          CategoryItem(
+              icon: Ionicons.map_outline,
+              title: 'Campus Navigation',
+            description: 'Navigate through the campus live'
+          )
         ];
       case 2:
         return [
@@ -458,6 +463,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       'Daily Reminder': Colors.red,
       'Study AI': Colors.teal,
       'Cafe Menu': Colors.amber,
+      'Campus Navigation': Colors.pink,
       'Gallery': Colors.pink,
       'Religious': Colors.deepPurple,
     };
