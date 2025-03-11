@@ -82,16 +82,16 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-  fonts:
-    - family: jost
-      fonts:
-        - asset: lib/fonts/Jost-Regular.ttf
-        - asset: lib/fonts/Jost-Bold.ttf
-          weight: 700
-        - asset: lib/fonts/Jost-Medium.ttf
-          weight: 500
-        - asset: lib/fonts/Jost-Light.ttf
-          weight: 300
+#  fonts:
+#    - family: jost
+#      fonts:
+#        - asset: lib/fonts/Jost-Regular.ttf
+#        - asset: lib/fonts/Jost-Bold.ttf
+#          weight: 700
+#        - asset: lib/fonts/Jost-Medium.ttf
+#          weight: 500
+#        - asset: lib/fonts/Jost-Light.ttf
+#          weight: 300
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -100,24 +100,9 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - .env
-    - lib/assets/splash.jpg
-    - lib/assets/image1.png
-    - lib/assets/onboarding1.png
-    - lib/assets/onboarding2.png
-    - lib/assets/onboarding3.png
-    - lib/assets/image1.svg
-    - lib/assets/verification.jpeg
-    - lib/assets/jit.png
-    - lib/assets/jit.jpg
-    - lib/assets/civil.jpg
-    - lib/assets/material.jpg
-    - lib/assets/electrical.jpg
-    - lib/assets/mechanical.jpg
-    - lib/assets/computing.jpg
-    - lib/assets/biomedical.jpg
-    - lib/assets/chemical.jpg
-    - lib/assets/aviation.jpg
-    - lib/assets/freshman.jpg
+    - lib/assets/
+    - lib/assets/foods/
+
     - lib/assets/academic_calendar.pdf
 
   # An image asset can refer to one or more resolution-specific "variants", see

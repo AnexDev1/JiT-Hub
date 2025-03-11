@@ -16,39 +16,39 @@ class _CafeMenuState extends State<CafeMenu> {
   // Mapping meal types to their image paths
   final Map<String, Map<String, String>> _mealImages = {
     'Monday': {
-      'breakfast': 'lib/assets/meals/monday_breakfast.jpg',
-      'lunch': 'lib/assets/meals/monday_lunch.jpg',
-      'dinner': 'lib/assets/meals/monday_dinner.jpg',
+      'breakfast': 'lib/assets/foods/rice-tomato.jpg',
+      'lunch': 'lib/assets/foods/shiro-vegitable.jpg',
+      'dinner': 'lib/assets/foods/kek.jpg',
     },
     'Tuesday': {
-      'breakfast': 'lib/assets/meals/tuesday_breakfast.jpg',
-      'lunch': 'lib/assets/meals/tuesday_lunch.jpg',
-      'dinner': 'lib/assets/meals/tuesday_dinner.jpg',
+      'breakfast': 'lib/assets/foods/kinche.jpg',
+      'lunch': 'lib/assets/foods/kek.jpg',
+      'dinner': 'lib/assets/foods/dinch-besga.jpg',
     },
     'Wednesday': {
-      'breakfast': 'lib/assets/meals/wednesday_breakfast.jpg',
-      'lunch': 'lib/assets/meals/wednesday_lunch.jpg',
-      'dinner': 'lib/assets/meals/wednesday_dinner.jpg',
+      'breakfast': 'lib/assets/foods/kinche.jpg',
+      'lunch': 'lib/assets/foods/kek.jpg',
+      'dinner': 'lib/assets/foods/shiro.jpg',
     },
     'Thursday': {
-      'breakfast': 'lib/assets/meals/thursday_breakfast.jpg',
-      'lunch': 'lib/assets/meals/thursday_lunch.jpg',
-      'dinner': 'lib/assets/meals/thursday_dinner.jpg',
+      'breakfast': 'lib/assets/foods/rice-tomato.jpg',
+      'lunch': 'lib/assets/foods/shiro-vegitable.jpg',
+      'dinner': 'lib/assets/foods/kek.jpg',
     },
     'Friday': {
-      'breakfast': 'lib/assets/meals/friday_breakfast.jpg',
-      'lunch': 'lib/assets/meals/friday_lunch.jpg',
-      'dinner': 'lib/assets/meals/friday_dinner.jpg',
+      'breakfast': 'lib/assets/foods/kinche.jpg',
+      'lunch': 'lib/assets/foods/dinch.jpg',
+      'dinner': 'lib/assets/foods/shiro-vegitable.jpg',
     },
     'Saturday': {
-      'breakfast': 'lib/assets/meals/saturday_breakfast.jpg',
-      'lunch': 'lib/assets/meals/saturday_lunch.jpg',
-      'dinner': 'lib/assets/meals/saturday_dinner.jpg',
+      'breakfast': 'lib/assets/foods/rice-tomato.jpg',
+      'lunch': 'lib/assets/foods/dinch-besga.jpg',
+      'dinner': 'lib/assets/foods/kek.jpg',
     },
     'Sunday': {
-      'breakfast': 'lib/assets/meals/sunday_breakfast.jpg',
-      'lunch': 'lib/assets/meals/sunday_lunch.jpg',
-      'dinner': 'lib/assets/meals/sunday_dinner.jpg',
+      'breakfast': 'lib/assets/foods/firfir.jpg',
+      'lunch': 'lib/assets/foods/shiro.jpg',
+      'dinner': 'lib/assets/foods/kek.jpg',
     },
   };
 
@@ -273,6 +273,7 @@ class _CafeMenuState extends State<CafeMenu> {
     );
   }
 
+  // dart
   Widget _buildMealCard(
       String mealType,
       String hours,
@@ -304,12 +305,12 @@ class _CafeMenuState extends State<CafeMenu> {
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: color.withValues(alpha:0.2),
+                        color: color.withOpacity(0.2),
                         child: Center(
                           child: Icon(
                             icon,
                             size: 60,
-                            color: color.withValues(alpha:0.6),
+                            color: color.withOpacity(0.6),
                           ),
                         ),
                       );
@@ -323,7 +324,7 @@ class _CafeMenuState extends State<CafeMenu> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withValues(alpha:0.7),
+                          Colors.black.withOpacity(0.7),
                         ],
                         stops: const [0.6, 1.0],
                       ),
@@ -369,7 +370,7 @@ class _CafeMenuState extends State<CafeMenu> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha:0.7),
+                        color: Colors.black.withOpacity(0.7),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -386,7 +387,6 @@ class _CafeMenuState extends State<CafeMenu> {
               ),
             ),
           ),
-
           // Menu items
           Padding(
             padding: const EdgeInsets.all(16),
@@ -415,7 +415,7 @@ class _CafeMenuState extends State<CafeMenu> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    ...category.value.map((item) => Padding(
+                    ...category.value.map((dish) => Padding(
                       padding: const EdgeInsets.only(left: 16, bottom: 8),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,14 +425,14 @@ class _CafeMenuState extends State<CafeMenu> {
                             width: 6,
                             height: 6,
                             decoration: BoxDecoration(
-                              color: color.withValues(alpha:0.7),
+                              color: color.withOpacity(0.7),
                               shape: BoxShape.circle,
                             ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              item,
+                              dish,
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 height: 1.4,
@@ -473,109 +473,172 @@ class _CafeMenuState extends State<CafeMenu> {
     final Map<String, Map<String, Map<String, List<String>>>> weeklyMenu = {
       'Monday': {
         'breakfast': {
-          'Main Course': ['Scrambled Eggs', 'Pancakes with Maple Syrup'],
+          'Main Course': [
+              'ሩዝ በቲማቲም ስጎ'
+          ],
 
-          'Beverages': [ 'Tea'],
+          'Beverages': [ 'Tea'
+          ],
         },
         'lunch': {
-          'Main Course': ['Grilled Chicken Sandwich', 'Vegetable Minestrone Soup'],
+          'Main Course': [
+           'ሽሮ በአትክልት'
+          ],
 
         },
         'dinner': {
-          'Main Course': ['Spaghetti with Meatballs', 'Baked Tilapia'],
+          'Main Course': [
+            'ክክ ወጥ'
+          ],
 
         },
       },
       'Tuesday': {
         'breakfast': {
-          'Main Course': ['Breakfast Burrito', 'Steel-Cut Oatmeal'],
-          'Beverages': [ 'Tea'],
+          'Main Course': [
+            'ቅንጬ'
+          ],
+          'Beverages': [
+            'Tea'
+          ],
         },
         'lunch': {
-          'Main Course': ['Beef Street Tacos', 'Black Bean Soup'],
+          'Main Course': [
+           'ክክ ወጥ'
+          ],
 
         },
         'dinner': {
-          'Main Course': ['Herb Roasted Chicken', 'Vegetable Lasagna'],
+          'Main Course': [
+          'ድንች በስጋ ወጥ'
+          ],
 
         },
       },
       'Wednesday': {
         'breakfast': {
-          'Main Course': ['French Toast', 'Breakfast Sandwich'],
-          'Beverages': [ 'Tea'],
+          'Main Course': [
+            'ቅንጬ'
+          ],
+          'Beverages': ['Tea'
+          ],
         },
         'lunch': {
-          'Main Course': ['Classic Hamburger', 'Tomato Bisque'],
+          'Main Course': [
+            'ክክ ወጥ'
+          ],
 
         },
         'dinner': {
-          'Main Course': ['Vegetable Stir-Fry with Rice', 'Grilled Salmon'],
+          'Main Course': [
+            'ሽሮ ወጥ'
+          ],
 
         },
       },
       'Thursday': {
         'breakfast': {
-          'Main Course': ['Belgian Waffles', 'Egg White Frittata'],
-          'Beverages': [ 'Tea'],
+          'Main Course': [
+            'ሩዝ በቲማቲም ሱጎ'
+          ],
+          'Beverages': [
+          'Tea'
+          ],
         },
         'lunch': {
-          'Main Course': ['Margherita Pizza', 'Minestrone Soup'],
+          'Main Course': [
+            'ሽሮና አትክልት'
+          ],
 
         },
         'dinner': {
-          'Main Course': ['Beef Stroganoff', 'Eggplant Parmesan'],
+          'Main Course': [
+            'ክክ ወጥ'
+          ],
 
         },
       },
       'Friday': {
         'breakfast': {
-          'Main Course': ['Eggs Benedict', 'Avocado Toast'],
-          'Beverages': [ 'Tea'],
+          'Main Course': [
+            'ቅንጬ'
+          ],
+          'Beverages': [ 'Tea'
+          ],
         },
         'lunch': {
-          'Main Course': ['Fish & Chips', 'New England Clam Chowder'],
+          'Main Course': [
+           'ድንች ወጥ'
+          ],
 
         },
         'dinner': {
-          'Main Course': ['BBQ Ribs', 'Stuffed Bell Peppers'],
+          'Main Course': [
+          'ሽሮና አትክልት'
+          ],
 
         },
       },
       'Saturday': {
         'breakfast': {
-          'Main Course': ['Build-Your-Own Omelet Station', 'Buttermilk Pancakes'],
-          'Beverages': [ 'Tea'],
+          'Main Course': [
+            'ሩዝ በቲማቲም ሱጎ',
+          ],
+          'Beverages': [ 'Tea',
+          ],
         },
         'lunch': {
-          'Main Course': ['Deli Sandwich Bar', 'Chicken Noodle Soup'],
+          'Main Course': [
+            'ድንች በስጋ ወጥ'
+          ],
 
         },
         'dinner': {
-          'Main Course': ['Build-Your-Own Pasta Bar', 'Grilled Chicken'],
+          'Main Course': [
+           'ክክ ወጥ'
+          ],
 
         },
       },
       'Sunday': {
         'breakfast': {
-          'Main Course': ['Omelets Made to Order', 'Cinnamon Rolls'],
-          'Beverages': [ 'Tea'],
+          'Main Course': [
+            'እንጀራ ፍርፍር',
+          ],
+          'Beverages': [ 'Tea',
+          ],
         },
         'lunch': {
-          'Main Course': ['Sunday Brunch Buffet', 'Assorted Pastries'],
+          'Main Course': [
+         'ሽሮ ወጥ'
+          ],
 
         },
         'dinner': {
-          'Main Course': ['Slow Roasted Prime Rib', 'Herb Baked Chicken'],
+          'Main Course': [
+           'ክክ ወጥ'
+          ],
 
         },
       },
     };
 
     return weeklyMenu[day] ?? {
-      'breakfast': {'Main Items': ['Not Available']},
-      'lunch': {'Main Items': ['Not Available']},
-      'dinner': {'Main Items': ['Not Available']},
+      'breakfast': {
+        'Main Items': [
+        'Not Available',
+        ]
+      },
+      'lunch': {
+        'Main Items': [
+         'Not Available'
+        ]
+      },
+      'dinner': {
+        'Main Items': [
+         'Not Available'
+        ]
+      },
     };
   }
 }

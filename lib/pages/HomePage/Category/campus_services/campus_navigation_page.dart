@@ -10,6 +10,8 @@ import 'package:geolocator/geolocator.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
+import '../../../../model/campus_location.dart';
 class CampusNavigationPage extends StatefulWidget {
   const CampusNavigationPage({super.key});
 
@@ -208,11 +210,37 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
   }
 
 
+  List<LatLng> smoothPolyline(List<LatLng> points, {int granularity = 10}) {
+    if (points.length < 3) return points;
+    List<LatLng> smoothed = [];
+    // Iterate over segments between points.
+    for (int i = 0; i < points.length - 1; i++) {
+      LatLng p0 = i == 0 ? points[i] : points[i - 1];
+      LatLng p1 = points[i];
+      LatLng p2 = points[i + 1];
+      LatLng p3 = i + 2 < points.length ? points[i + 2] : p2;
 
+      for (int j = 0; j < granularity; j++) {
+        double t = j / granularity;
+        double t2 = t * t;
+        double t3 = t2 * t;
+        // Catmull–Rom spline formula coefficients.
+        double q1 = -t3 + 2 * t2 - t;
+        double q2 = 3 * t3 - 5 * t2 + 2;
+        double q3 = -3 * t3 + 4 * t2 + t;
+        double q4 = t3 - t2;
+
+        double lon = (p0.longitude * q1 + p1.longitude * q2 + p2.longitude * q3 + p3.longitude * q4) / 2;
+        double lat = (p0.latitude * q1 + p1.latitude * q2 + p2.latitude * q3 + p3.latitude * q4) / 2;
+
+        smoothed.add(LatLng(lat, lon));
+      }
+    }
+    // Add the last point.
+    smoothed.add(points.last);
+    return smoothed;
+  }
   Future<void> _navigateTo(CampusLocation location) async {
-    //location request
-
-
     setState(() {
       _isLoading = true;
     });
@@ -233,7 +261,7 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
 
     final routePoints = await _getRoute(userLatLng, location.position);
     setState(() {
-      _routePoints = routePoints;
+      _routePoints = smoothPolyline(routePoints);
       _isLoading = false;
     });
     _mapController.move(location.position, 18);
@@ -671,26 +699,3 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
   }
 }
 
-enum LocationCategory { academic, administrative, food, residence, recreation, services }
-
-class CampusLocation {
-  final String id;
-  final String name;
-  final LatLng position;
-  final String description;
-  final IconData iconData;
-  final LocationCategory category;
-  final String openingHours;
-  final int floorCount;
-
-  CampusLocation({
-    required this.id,
-    required this.name,
-    required this.position,
-    required this.description,
-    required this.iconData,
-    required this.category,
-    required this.openingHours,
-    required this.floorCount,
-  });
-}
