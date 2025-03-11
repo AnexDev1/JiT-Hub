@@ -1,4 +1,6 @@
 // dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -25,6 +27,8 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
   List<LatLng> _routePoints = [];
   bool _isLoading = false;
 
+  LatLng? _userLocation;
+  late StreamSubscription<Position> _positionStream;
   final List<CampusLocation> _locations = [
     CampusLocation(
       id: '1',
@@ -126,7 +130,7 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
       return true;
     }).toList();
 
-    return filtered.map((location) {
+    final campusMarkers = filtered.map((location) {
       return Marker(
         width: 100,
         height: 20,
@@ -151,6 +155,22 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
         ),
       );
     }).toList();
+
+    if(_userLocation != null){
+      campusMarkers.add(
+        Marker(
+          width: 100,
+          height: 20,
+          point: _userLocation!,
+          child:  const CircleAvatar(
+            radius: 20,
+            backgroundColor: Colors.blue,
+            child: Text('U', style:TextStyle(color: Colors.white)),
+          ),
+        ),
+      );
+    }
+    return campusMarkers;
   }
 
   Color _getMarkerColor(LocationCategory category) {
@@ -188,8 +208,11 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
   }
 
 
-// dart
+
   Future<void> _navigateTo(CampusLocation location) async {
+    //location request
+
+
     setState(() {
       _isLoading = true;
     });
@@ -263,6 +286,25 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
     return list;
   }
 
+  @override
+    void initState(){
+    super.initState();
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+            distanceFilter: 10,
+      ),
+    ).listen((Position position){
+      setState((){
+        _userLocation = LatLng(position.latitude, position.longitude);
+      });
+    });
+  }
+  @override
+  void dispose(){
+    _positionStream.cancel();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
