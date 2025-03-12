@@ -147,6 +147,7 @@ class DailyReminder extends StatelessWidget {
     );
   }
 
+// dart
   Widget _buildDateSection(
       BuildContext context,
       ReminderProvider provider,
@@ -155,28 +156,57 @@ class DailyReminder extends StatelessWidget {
       String labelText,
       ) {
     final theme = Theme.of(context);
+    List<Widget> children = [];
+
+    // Add date header if labelText is not "Today", "Tomorrow", and not a "Deadline Passed" message.
+    if (labelText != 'Today' &&
+        labelText != 'Tomorrow' &&
+        !labelText.startsWith('Deadline Passed')) {
+      children.add(Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child:Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            labelText,
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
+      ));
+    }
+
+    // Build reminder cards.
+    children.addAll(indices.map((index) => _buildReminderCard(context, provider, index)));
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-
-          ...indices.map((index) => _buildReminderCard(context, provider, index)),
-        ],
+        children: children,
       ),
     );
   }
+
+// dart
 // dart
   Widget _buildReminderCard(BuildContext context, ReminderProvider provider, int index) {
     final reminder = provider.reminders[index];
     final DateFormat timeFormat = DateFormat('h:mm a');
     final bool past = reminder.date.isBefore(DateTime.now());
     final bool isToday = _isSameDate(reminder.date, DateTime.now());
+    final bool isTomorrow = _isSameDate(reminder.date, DateTime.now().add(Duration(days: 1)));
     final theme = Theme.of(context);
 
-    // Build the header tag if reminder is today.
+    // Build the header tag if reminder is today or tomorrow.
     Widget headerTag = const SizedBox.shrink();
-    if (isToday) {
+    if (isToday || isTomorrow) {
       headerTag = Row(
         children: [
           Container(
@@ -188,7 +218,7 @@ class DailyReminder extends StatelessWidget {
             child: Text(
               past
                   ? 'Deadline Passed (${timeFormat.format(reminder.date)})'
-                  : 'Today',
+                  : (isToday ? 'Today' : 'Tomorrow'),
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -436,8 +466,11 @@ class DailyReminder extends StatelessWidget {
 
   String _computeLabel(DateTime reminderDate) {
     final now = DateTime.now();
+    final tomorrow = now.add(Duration(days: 1));
     if (_isSameDate(reminderDate, now)) {
       return 'Today';
+    } else if (_isSameDate(reminderDate, tomorrow)) {
+      return 'Tomorrow';
     } else if (now.isAfter(reminderDate)) {
       return 'Deadline Passed (${DateFormat("h:mm a").format(reminderDate.toLocal())})';
     } else {
