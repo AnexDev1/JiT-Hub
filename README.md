@@ -1,43 +1,84 @@
 # JIT Hub
 
-Jit Hub is a mobile app designed to help students manage all college-related tasks and campus navigation needs. It serves as a reminder for upcoming tests, assignments, and notes while providing an intuitive, location-based experience using maps and real-time notifications.
+JIT Hub is an AI-powered mobile application designed specifically for students at Jimma Institute of Technology (JIT). Built with Flutter, it aims to streamline campus life by providing essential information, academic tools, and community resources in one convenient place.
 
 ## Features
 
-- **Task Management:** Create, update, and delete tasks or reminders.
-- **Campus Navigation:** Locate buildings and services on campus using interactive maps.
-- **Polylines for Navigation:** Generate routes using Mapbox directions with a loading indicator.
-- **Real-time Notifications:** Stay informed with alerts about tasks and upcoming deadlines.
-- **Search & Filter:** Quickly search through campus locations and tasks by category.
-- **Data Persistence:** Store data locally using Hive for offline access.
-- **PDF Viewing:** Open and view academic calendars, syllabi, and other documents.
-- **Image Picking:** Select images for tasks or profile customization.
-- **Markdown Rendering:** Render formatted text with flutter_markdown.
-- **AI Integration:** Enhance features using Google Generative AI.
-- **Animated UI:** Enjoy smooth UI animations with animated_text_kit and flutter_animate.
-- **Modern UI/UX:** Built with Flutter, Google Fonts, Ionicons, and flutter_native_splash for a polished experience.
-- **Cross-Platform Support:** Uses Kotlin, C, C++, Java, and Gradle where needed for native functionalities.
+* **JIT History and Background:** Learn about the rich history and background of Jimma Institute of Technology.
+* **Academic Calendar:** Stay up-to-date with important academic dates and events.
+* **Department Information:** Explore detailed descriptions of all departments offered at JIT.
+* **Campus Cafe Menu:** View the daily meal lists and menus from the campus cafe.
+* **Campus Navigation:** Navigate the campus effortlessly using real-time location tracking and maps, with directions to key locations like the cafe, library, and registrar.
+* **AI-Powered Study Assistant (Gemini 2.0):** Utilize a powerful study assistant powered by Gemini 2.0. Upload files, images, or text, and receive assistance with your studies.
+* **Grade Calculator:** Easily calculate your grades by inputting your scores.
+* **Class Schedule:** Manage your class schedule by adding and tracking your daily classes.
+* **Task Reminders:** Set reminders for assignments, exams, projects, study sessions, or any other tasks with customizable time and date settings.
+* **Campus Gallery:** Browse a collection of stunning images showcasing the campus and its events.
+* **Religious Clubs and Communities:** Find information about religious clubs and communities on campus, including contact details and channel links.
 
-## Built With
+## Technologies Used
 
-- [Flutter](https://flutter.dev/) & [Dart](https://dart.dev/)
-- [Hive](https://pub.dev/packages/hive) & [Hive Flutter](https://pub.dev/packages/hive_flutter)
-- [geolocator](https://pub.dev/packages/geolocator)
-- [flutter_map](https://pub.dev/packages/flutter_map) & [latlong2](https://pub.dev/packages/latlong2)
-- [http](https://pub.dev/packages/http)
-- [Mapbox Directions API](https://docs.mapbox.com/api/navigation/directions/)
-- Additional dependencies: cupertino_icons, flutter_svg, shared_preferences, intl, provider, flutter_pdfview, image_picker, flutter_dotenv, flutter_markdown, flutter_native_splash, google_generative_ai, file_picker, animated_text_kit, timezone, url_launcher, google_fonts, ionicons, and flutter_animate.
+* **Flutter:** Cross-platform mobile development framework.
+* **Dart:** Programming language.
+* **Provider:** State management.
+* **Hive:** Local database.
+* **Gemini API (Gemini 2.0):** AI-powered study assistance.
+* **Geolocator:** Location services.
+* **Flutter Maps:** Map integration.
+* **Mapbox Directions API:** Navigation and directions.
+* **HTTP:** Network requests.
 
-## Getting Started
+## Installation
 
-### Prerequisites
+1.  **Clone the repository:**
+    ```bash
+    git clone [your-repository-url]
+    ```
+2.  **Navigate to the project directory:**
+    ```bash
+    cd jit_hub
+    ```
+3.  **Install dependencies:**
+    ```bash
+    flutter pub get
+    ```
+4.  **Configure API keys (if necessary):**
+    * Add your Gemini API key, Mapbox API key and any other needed api keys to your env file or where ever you are storing them.
+5.  **Run the app:**
+    ```bash
+    flutter run
+    ```
 
-- Flutter SDK (see [Flutter installation guide](https://flutter.dev/docs/get-started/install))
-- A valid Mapbox access token (replace `YOUR_MAPBOX_ACCESS_TOKEN` in the code)
+## Usage
 
-### Installation
+* **Explore the main menu:** Navigate through the app's features using the bottom navigation bar or the main menu.
+* **Campus navigation:** Enable location services to use the map and navigation features.
+* **AI study assistant:** Upload files, images, or text to the study assistant page and ask your questions.
+* **Grade calculator:** Enter your scores and credits to calculate your GPA.
+* **Class schedule and reminders:** Add your classes and tasks to stay organized.
+* **Gallery:** Browse the images in the gallery page.
+* **Community page:** find information about religious clubs.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/AnexDev1/nex_planner.git
-   cd nex_planner
+## Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1.  Fork the repository.
+2.  Create a new branch for your feature or bug fix.
+3.  Make your changes and commit them.
+4.  Push your changes to your fork.
+5.  Submit a pull request.
+
+## License
+
+This project is licensed under the [Your License] License. (Example: MIT License)
+
+## Screenshots
+
+(Add screenshots or GIFs of your app here)
+
+## Additional Notes
+
+* Ensure you have a stable internet connection for features that rely on APIs.
+* Please grant the app the needed permissions for location and storage.
+* Replace `[your-repository-url]` and `[Your License]` with your actual repository URL and license.
