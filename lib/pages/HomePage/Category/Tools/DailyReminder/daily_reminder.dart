@@ -27,8 +27,7 @@ class DailyReminder extends StatelessWidget {
             icon: Icon(Icons.sort, color: theme.primaryColor),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content:
-                Text('Sort options coming soon', style: GoogleFonts.inter()),
+                content: Text('Sort options coming soon', style: GoogleFonts.inter()),
                 behavior: SnackBarBehavior.floating,
               ));
             },
@@ -161,198 +160,186 @@ class DailyReminder extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: labelText == 'Today'
-                      ? theme.primaryColor
-                      : Colors.grey[200],
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  labelText,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: labelText == 'Today' ? Colors.white : Colors.grey[700],
-                  ),
-                ),
-              ),
-              if (labelText == 'Today' &&
-                  !_deadlinePassed(Provider.of<ReminderProvider>(context, listen: false)
-                      .reminders[indices.first]
-                      .date))
-                const SizedBox(width: 8),
-              if (labelText == 'Today' &&
-                  !_deadlinePassed(Provider.of<ReminderProvider>(context, listen: false)
-                      .reminders[indices.first]
-                      .date))
-                Icon(Icons.circle, size: 8, color: theme.primaryColor),
-            ],
-          ),
-          const SizedBox(height: 12),
+
           ...indices.map((index) => _buildReminderCard(context, provider, index)),
         ],
       ),
     );
   }
-
+// dart
   Widget _buildReminderCard(BuildContext context, ReminderProvider provider, int index) {
     final reminder = provider.reminders[index];
     final DateFormat timeFormat = DateFormat('h:mm a');
     final bool past = reminder.date.isBefore(DateTime.now());
+    final bool isToday = _isSameDate(reminder.date, DateTime.now());
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        elevation: 0,
-        color: past ? Colors.grey[100] : Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.grey[200]!, width: 1),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {},
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+
+    // Build the header tag if reminder is today.
+    Widget headerTag = const SizedBox.shrink();
+    if (isToday) {
+      headerTag = Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: past ? Colors.red[700] : theme.primaryColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              past
+                  ? 'Deadline Passed (${timeFormat.format(reminder.date)})'
+                  : 'Today',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          if (!past)
+            const SizedBox(width: 8),
+          if (!past)
+            Icon(Icons.circle, size: 8, color: theme.primaryColor),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        headerTag,
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Card(
+            elevation: 0,
+            color: past ? Colors.grey[100] : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: Colors.grey[200]!, width: 1),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {},
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      timeFormat.format(reminder.date).split(' ')[0],
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        color: past ? Colors.grey[500] : Colors.black87,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          timeFormat.format(reminder.date).split(' ')[0],
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                            color: past ? Colors.grey[500] : Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          timeFormat.format(reminder.date).split(' ')[1],
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            color: past ? Colors.grey[500] : Colors.grey[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      width: 2,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        color: _getCategoryColor(reminder.category).withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                    Text(
-                      timeFormat.format(reminder.date).split(' ')[1],
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: past ? Colors.grey[500] : Colors.grey[700],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  reminder.title,
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                    color: past ? Colors.grey[600] : Colors.black87,
+                                  ),
+                                ),
+                              ),
+                              if (reminder.remindMe)
+                                Icon(
+                                  Icons.notifications_active_rounded,
+                                  size: 16,
+                                  color: theme.primaryColor,
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          if (reminder.category.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _getCategoryColor(reminder.category).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _getCategoryIcon(reminder.category),
+                                    size: 14,
+                                    color: _getCategoryColor(reminder.category),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    reminder.category,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: _getCategoryColor(reminder.category),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 18),
+                                onPressed: () {},
+                                color: Colors.grey[600],
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                              const SizedBox(width: 16),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, size: 18),
+                                onPressed: () => _showDeleteConfirmation(context, provider, index),
+                                color: Colors.red[400],
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              )
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  width: 2,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    color: _getCategoryColor(reminder.category).withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              reminder.title,
-                              style: GoogleFonts.inter(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                color: past ? Colors.grey[600] : Colors.black87,
-                              ),
-                            ),
-                          ),
-                          if (reminder.remindMe)
-                            Icon(
-                              Icons.notifications_active_rounded,
-                              size: 16,
-                              color: theme.primaryColor,
-                            ),
-                        ],
-                      ),
-                      if (past)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.red[100],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'Deadline Passed',
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.red[800],
-                              ),
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 8),
-                      if (reminder.category.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: _getCategoryColor(reminder.category).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                _getCategoryIcon(reminder.category),
-                                size: 14,
-                                color: _getCategoryColor(reminder.category),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                reminder.category,
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: _getCategoryColor(reminder.category),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit_outlined, size: 18),
-                            onPressed: () {},
-                            color: Colors.grey[600],
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                          const SizedBox(width: 16),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, size: 18),
-                            onPressed: () => _showDeleteConfirmation(context, provider, index),
-                            color: Colors.red[400],
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
-
   Map<String, List<int>> _groupRemindersByDate(List<dynamic> reminders) {
     final Map<String, List<int>> grouped = {};
     final DateFormat dateFormat = DateFormat('yyyy-MM-dd');
