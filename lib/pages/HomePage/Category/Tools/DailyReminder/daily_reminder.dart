@@ -1,3 +1,4 @@
+// dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -12,15 +13,12 @@ class DailyReminder extends StatelessWidget {
   Widget build(BuildContext context) {
     final reminderProvider = Provider.of<ReminderProvider>(context);
     final theme = Theme.of(context);
-
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text(
           'Daily Reminders',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-          ),
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         elevation: 0,
@@ -28,12 +26,11 @@ class DailyReminder extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.sort, color: theme.primaryColor),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Sort options coming soon', style: GoogleFonts.inter()),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content:
+                Text('Sort options coming soon', style: GoogleFonts.inter()),
+                behavior: SnackBarBehavior.floating,
+              ));
             },
           ),
         ],
@@ -42,17 +39,15 @@ class DailyReminder extends StatelessWidget {
           ? _buildEmptyState(context)
           : _buildReminderTimeline(context, reminderProvider),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: theme.primaryColor,
         onPressed: () {
           showDialog(
             context: context,
-            builder: (context) {
-              return ReminderModal(
-                onAddReminder: reminderProvider.loadReminders,
-              );
-            },
+            builder: (context) => ReminderModal(
+              onAddReminder: reminderProvider.loadReminders,
+            ),
           );
         },
-        backgroundColor: theme.primaryColor,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
@@ -66,7 +61,7 @@ class DailyReminder extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.blue.withValues(alpha:0.1),
+              color: Colors.blue.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -79,10 +74,7 @@ class DailyReminder extends StatelessWidget {
           Text(
             'No Reminders Yet',
             style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
-            ),
+                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey),
           ),
           const SizedBox(height: 12),
           Padding(
@@ -90,10 +82,7 @@ class DailyReminder extends StatelessWidget {
             child: Text(
               'Add your first reminder to stay on track with your daily tasks',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: GoogleFonts.inter(fontSize: 16, color: Colors.grey),
             ),
           ),
           const SizedBox(height: 32),
@@ -101,11 +90,10 @@ class DailyReminder extends StatelessWidget {
             onPressed: () {
               showDialog(
                 context: context,
-                builder: (context) {
-                  return ReminderModal(
-                    onAddReminder: Provider.of<ReminderProvider>(context, listen: false).loadReminders,
-                  );
-                },
+                builder: (context) => ReminderModal(
+                  onAddReminder: Provider.of<ReminderProvider>(context, listen: false)
+                      .loadReminders,
+                ),
               );
             },
             icon: const Icon(Icons.add),
@@ -124,7 +112,6 @@ class DailyReminder extends StatelessWidget {
   }
 
   Widget _buildReminderTimeline(BuildContext context, ReminderProvider provider) {
-    // Group reminders by date
     final Map<String, List<int>> groupedReminders = _groupRemindersByDate(provider.reminders);
     final List<String> dates = groupedReminders.keys.toList()..sort();
 
@@ -136,38 +123,39 @@ class DailyReminder extends StatelessWidget {
             child: Text(
               'Your Schedule',
               style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+                  fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey[800]),
             ),
           ),
         ),
         SliverList(
           delegate: SliverChildBuilderDelegate(
                 (context, index) {
-              final date = dates[index];
-              final reminderIndices = groupedReminders[date]!;
-              final isToday = _isToday(provider.reminders[reminderIndices.first].date);
-
-              return _buildDateSection(context, provider, date, reminderIndices, isToday);
+              final dateStr = dates[index];
+              final indices = groupedReminders[dateStr]!;
+              final DateTime reminderDate =
+                  Provider.of<ReminderProvider>(context, listen: false)
+                      .reminders[indices.first].date;
+              final labelText = _computeLabel(reminderDate);
+              return _buildDateSection(context, provider, dateStr, indices, labelText);
             },
             childCount: dates.length,
           ),
         ),
         const SliverToBoxAdapter(
-          child: SizedBox(height: 80), // Bottom padding for FAB
+          child: SizedBox(height: 80),
         ),
       ],
     );
   }
 
-// Language: dart
-  Widget _buildDateSection(BuildContext context, ReminderProvider provider, String date, List<int> reminderIndices, bool isToday) {
-    final DateFormat dateFormat = DateFormat('EEE, MMM d, yyyy');
-    final DateTime dateTime = provider.reminders[reminderIndices.first].date;
+  Widget _buildDateSection(
+      BuildContext context,
+      ReminderProvider provider,
+      String dateStr,
+      List<int> indices,
+      String labelText,
+      ) {
     final theme = Theme.of(context);
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
@@ -178,96 +166,96 @@ class DailyReminder extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: isToday ? theme.primaryColor : Colors.grey[200],
+                  color: labelText == 'Today'
+                      ? theme.primaryColor
+                      : Colors.grey[200],
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  isToday ? (_isPassed(dateTime) ? 'Deadline passed' : 'Today') : dateFormat.format(dateTime),
+                  labelText,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: isToday ? Colors.white : Colors.grey[700],
+                    color: labelText == 'Today' ? Colors.white : Colors.grey[700],
                   ),
                 ),
               ),
-              if (isToday && !_isPassed(dateTime)) ...[
+              if (labelText == 'Today' &&
+                  !_deadlinePassed(Provider.of<ReminderProvider>(context, listen: false)
+                      .reminders[indices.first]
+                      .date))
                 const SizedBox(width: 8),
+              if (labelText == 'Today' &&
+                  !_deadlinePassed(Provider.of<ReminderProvider>(context, listen: false)
+                      .reminders[indices.first]
+                      .date))
                 Icon(Icons.circle, size: 8, color: theme.primaryColor),
-              ],
             ],
           ),
           const SizedBox(height: 12),
-          ...reminderIndices.map((index) => _buildReminderCard(context, provider, index)),
+          ...indices.map((index) => _buildReminderCard(context, provider, index)),
         ],
       ),
     );
   }
+
   Widget _buildReminderCard(BuildContext context, ReminderProvider provider, int index) {
     final reminder = provider.reminders[index];
     final DateFormat timeFormat = DateFormat('h:mm a');
-    final isPast = reminder.date.isBefore(DateTime.now());
+    final bool past = reminder.date.isBefore(DateTime.now());
     final theme = Theme.of(context);
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
         elevation: 0,
-        color: isPast ? Colors.grey[100] : Colors.white,
+        color: past ? Colors.grey[100] : Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(color: Colors.grey[200]!, width: 1),
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            // Could open edit dialog here
-          },
+          onTap: () {},
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Time column
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      timeFormat.format(reminder.date).split(' ')[0], // Hour:minute
+                      timeFormat.format(reminder.date).split(' ')[0],
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w700,
                         fontSize: 18,
-                        color: isPast ? Colors.grey[500] : Colors.black87,
+                        color: past ? Colors.grey[500] : Colors.black87,
                       ),
                     ),
                     Text(
-                      timeFormat.format(reminder.date).split(' ')[1], // AM/PM
+                      timeFormat.format(reminder.date).split(' ')[1],
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
-                        color: isPast ? Colors.grey[500] : Colors.grey[700],
+                        color: past ? Colors.grey[500] : Colors.grey[700],
                       ),
                     ),
                   ],
                 ),
-
-                // Vertical line
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   width: 2,
                   height: 70,
                   decoration: BoxDecoration(
-                    color: _getCategoryColor(reminder.category).withValues(alpha:0.6),
+                    color: _getCategoryColor(reminder.category).withOpacity(0.6),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-
-                // Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
                             child: Text(
@@ -275,7 +263,7 @@ class DailyReminder extends StatelessWidget {
                               style: GoogleFonts.inter(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
-                                color: isPast ? Colors.grey[600] : Colors.black87,
+                                color: past ? Colors.grey[600] : Colors.black87,
                               ),
                             ),
                           ),
@@ -287,12 +275,31 @@ class DailyReminder extends StatelessWidget {
                             ),
                         ],
                       ),
+                      if (past)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.red[100],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              'Deadline Passed',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.red[800],
+                              ),
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: 8),
                       if (reminder.category.isNotEmpty)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _getCategoryColor(reminder.category).withValues(alpha:0.1),
+                            color: _getCategoryColor(reminder.category).withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -307,8 +314,7 @@ class DailyReminder extends StatelessWidget {
                               Text(
                                 reminder.category,
                                 style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
                                   color: _getCategoryColor(reminder.category),
                                 ),
                               ),
@@ -321,9 +327,7 @@ class DailyReminder extends StatelessWidget {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.edit_outlined, size: 18),
-                            onPressed: () {
-                              // Edit functionality
-                            },
+                            onPressed: () {},
                             color: Colors.grey[600],
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
@@ -331,13 +335,11 @@ class DailyReminder extends StatelessWidget {
                           const SizedBox(width: 16),
                           IconButton(
                             icon: const Icon(Icons.delete_outline, size: 18),
-                            onPressed: () {
-                              _showDeleteConfirmation(context, provider, index);
-                            },
+                            onPressed: () => _showDeleteConfirmation(context, provider, index),
                             color: Colors.red[400],
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
-                          ),
+                          )
                         ],
                       ),
                     ],
@@ -354,15 +356,14 @@ class DailyReminder extends StatelessWidget {
   Map<String, List<int>> _groupRemindersByDate(List<dynamic> reminders) {
     final Map<String, List<int>> grouped = {};
     final DateFormat dateFormat = DateFormat('yyyy-MM-dd');
-
     for (int i = 0; i < reminders.length; i++) {
-      final String date = dateFormat.format(reminders[i].date);
-      if (!grouped.containsKey(date)) {
-        grouped[date] = [];
+      final String key = dateFormat.format(reminders[i].date);
+      if (grouped.containsKey(key)) {
+        grouped[key]!.add(i);
+      } else {
+        grouped[key] = [i];
       }
-      grouped[date]!.add(i);
     }
-
     return grouped;
   }
 
@@ -410,33 +411,58 @@ class DailyReminder extends StatelessWidget {
 
   IconData _getCategoryIcon(String category) {
     switch (category.toLowerCase()) {
-      case 'work': return Icons.work;
-      case 'personal': return Icons.person;
-      case 'health': return Icons.favorite;
-      case 'study': return Icons.school;
-      case 'meeting': return Icons.people;
-      case 'bills': return Icons.receipt;
-      default: return Icons.label;
+      case 'work':
+        return Icons.work;
+      case 'personal':
+        return Icons.person;
+      case 'health':
+        return Icons.favorite;
+      case 'study':
+        return Icons.school;
+      case 'meeting':
+        return Icons.people;
+      case 'bills':
+        return Icons.receipt;
+      default:
+        return Icons.label;
     }
   }
 
   Color _getCategoryColor(String category) {
     switch (category.toLowerCase()) {
-      case 'work': return Colors.blue[700]!;
-      case 'personal': return Colors.purple[700]!;
-      case 'health': return Colors.green[700]!;
-      case 'study': return Colors.orange[700]!;
-      case 'meeting': return Colors.teal[700]!;
-      case 'bills': return Colors.red[700]!;
-      default: return Colors.grey[700]!;
+      case 'work':
+        return Colors.blue[700]!;
+      case 'personal':
+        return Colors.purple[700]!;
+      case 'health':
+        return Colors.green[700]!;
+      case 'study':
+        return Colors.orange[700]!;
+      case 'meeting':
+        return Colors.teal[700]!;
+      case 'bills':
+        return Colors.red[700]!;
+      default:
+        return Colors.grey[700]!;
     }
   }
 
-  bool _isToday(DateTime date) {
+  String _computeLabel(DateTime reminderDate) {
     final now = DateTime.now();
-    return date.year == now.year && date.month == now.month && date.day == now.day;
+    if (_isSameDate(reminderDate, now)) {
+      return 'Today';
+    } else if (now.isAfter(reminderDate)) {
+      return 'Deadline Passed (${DateFormat("h:mm a").format(reminderDate.toLocal())})';
+    } else {
+      return DateFormat('EEE, MMM d, yyyy').format(reminderDate.toLocal());
+    }
   }
-  bool _isPassed(DateTime dateTime) {
-    return DateTime.now().isAfter(dateTime);
+
+  bool _isSameDate(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  bool _deadlinePassed(DateTime reminderDate) {
+    return DateTime.now().isAfter(reminderDate);
   }
 }

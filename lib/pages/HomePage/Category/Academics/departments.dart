@@ -4,10 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 class Departments extends StatelessWidget {
   final Map<String, String> departmentImages = {
-    ' Civil and Environmental Engineering': 'lib/assets/civil.jpg',
+    'Civil and Environmental Engineering': 'lib/assets/civil.jpg',
     'Material Science and Engineering': 'lib/assets/material.jpg',
-    ' Electrical and Computer Engineering': 'lib/assets/electrical.jpg',
-    ' Mechanical Engineering': 'lib/assets/mechanical.jpg',
+    'Electrical and Computer Engineering': 'lib/assets/electrical.jpg',
+    'Mechanical Engineering': 'lib/assets/mechanical.jpg',
     'Computing and Informatics': 'lib/assets/computing.jpg',
     'Biomedical Engineering': 'lib/assets/biomedical.jpg',
     'Chemical Engineering': 'lib/assets/chemical.jpg',
@@ -17,10 +17,10 @@ class Departments extends StatelessWidget {
 
   // Icons for departments
   final Map<String, IconData> departmentIcons = {
-    ' Civil and Environmental Engineering': Icons.domain,
+    'Civil and Environmental Engineering': Icons.domain,
     'Material Science and Engineering': Icons.science,
-    ' Electrical and Computer Engineering': Icons.electrical_services,
-    ' Mechanical Engineering': Icons.precision_manufacturing,
+    'Electrical and Computer Engineering': Icons.electrical_services,
+    'Mechanical Engineering': Icons.precision_manufacturing,
     'Computing and Informatics': Icons.computer,
     'Biomedical Engineering': Icons.biotech,
     'Chemical Engineering': Icons.science,

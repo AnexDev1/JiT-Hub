@@ -6,6 +6,7 @@ import 'Academics/about_jit.dart';
 import 'Academics/calendar/academic_calendar.dart';
 import 'Academics/departments.dart';
 import 'Campus_life/religious_page.dart';
+import 'Campus_life/gallery.dart';
 import 'Tools/gradeCalculator/grade_calculator.dart';
 import 'Tools/ClassSchedule/class_schedule.dart';
 import 'Tools/DailyReminder/daily_reminder.dart';
@@ -34,6 +35,7 @@ class CategoryList extends StatelessWidget {
       'Cafe Menu': const CafeMenu(),
       'Religious': const ReligiousPage(),
       'Campus Navigation': CampusNavigationPage(),
+      'Gallery': const GalleryPage(),
     };
 
     return categoryWidgets[categoryName] ??
