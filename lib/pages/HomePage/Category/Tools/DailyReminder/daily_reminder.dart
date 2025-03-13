@@ -43,7 +43,8 @@ class DailyReminder extends StatefulWidget {
 
 class _DailyReminderState extends State<DailyReminder> {
   Timer? _timer;
-
+  // Keep track of which reminder IDs have already been notified
+  final Set<int> _notifiedReminderIds = {};
   @override
     void initState(){
     super.initState();
@@ -56,7 +57,7 @@ class _DailyReminderState extends State<DailyReminder> {
     _timer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (mounted) {
         setState(() {
-
+  checkPassedDeadlinesAndNotify(context);
         });
       }
     });
@@ -66,7 +67,6 @@ class _DailyReminderState extends State<DailyReminder> {
     _timer?.cancel();
     super.dispose();
   }
-  // Check for passed deadlines and send notifications
   void checkPassedDeadlinesAndNotify(BuildContext context) {
     final reminderProvider = Provider.of<ReminderProvider>(context, listen: false);
     final now = DateTime.now();
@@ -74,17 +74,22 @@ class _DailyReminderState extends State<DailyReminder> {
     for (int i = 0; i < reminderProvider.reminders.length; i++) {
       final reminder = reminderProvider.reminders[i];
 
-      // If deadline passed and notification is enabled
-      if (reminder.remindMe && reminder.date.isBefore(now)) {
+      // Get a unique identifier for this reminder
+      final int reminderId = i;
+
+      // Only send notification if we haven't notified for this reminder yet
+      if (reminder.remindMe && reminder.date.isBefore(now) && !_notifiedReminderIds.contains(reminderId)) {
         ReminderNotifier.scheduleReminder(
           reminderDate: reminder.date,
           title: "Deadline Passed: ${reminder.title}",
           body: "A reminder scheduled for ${DateFormat('h:mm a').format(reminder.date)} has passed",
         );
+
+        // Mark this reminder as notified
+        _notifiedReminderIds.add(reminderId);
       }
     }
   }
-
     void scheduleUpcomingNotifications(BuildContext context) {
     final reminderProvider = Provider.of<ReminderProvider>(context, listen: false);
     final now = DateTime.now();
@@ -129,11 +134,6 @@ class _DailyReminderState extends State<DailyReminder> {
   Widget build(BuildContext context) {
     final reminderProvider = Provider.of<ReminderProvider>(context);
     final theme = Theme.of(context);
-
-    // Check for passed deadlines when the page loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      checkPassedDeadlinesAndNotify(context);
-    });
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
