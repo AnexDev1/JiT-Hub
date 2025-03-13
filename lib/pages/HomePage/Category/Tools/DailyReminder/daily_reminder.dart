@@ -9,22 +9,24 @@ import '../../../../../provider/reminder_provider.dart';
 import '../../../../../services/notification_service.dart';
 import 'reminder_modal.dart';
 
+// dart
 class ReminderNotifier {
+  // Static set to persist notified reminders between page visits.
+  static final Set<String> notifiedReminderIds = {};
+
   static Future<void> scheduleReminder({
     required DateTime reminderDate,
     required String title,
     required String body,
   }) async {
     final now = DateTime.now();
-    // If the deadline is passed, schedule notification to trigger immediately
     final DateTime scheduledDate = now.isAfter(reminderDate)
         ? now.add(const Duration(seconds: 1))
         : reminderDate;
 
-    // Create a unique ID that's within 32-bit integer range
-    // Use reminder time + random component to avoid collisions
     final int notificationId = (reminderDate.millisecondsSinceEpoch % 1000000 +
-        DateTime.now().millisecondsSinceEpoch % 1000) % 2147483647;
+        DateTime.now().millisecondsSinceEpoch % 1000) %
+        2147483647;
 
     await NotificationService().scheduleNotification(
       id: notificationId,
@@ -73,27 +75,24 @@ class _DailyReminderState extends State<DailyReminder> {
     _timer?.cancel();
     super.dispose();
   }
+// dart
   void checkPassedDeadlinesAndNotify(BuildContext context) {
     final reminderProvider = Provider.of<ReminderProvider>(context, listen: false);
     final now = DateTime.now();
 
     for (int i = 0; i < reminderProvider.reminders.length; i++) {
       final reminder = reminderProvider.reminders[i];
-
-      // Get a unique identifier for this reminder
       final String reminderId = "${reminder.title}_${reminder.date.millisecondsSinceEpoch}";
 
-
-      // Only send notification if we haven't notified for this reminder yet
-      if (reminder.remindMe && reminder.date.isBefore(now) && !_notifiedReminderIds.contains(reminderId)) {
+      // Use the static set so notifications are only triggered once.
+      if (reminder.remindMe && reminder.date.isBefore(now) &&
+          !ReminderNotifier.notifiedReminderIds.contains(reminderId)) {
         ReminderNotifier.scheduleReminder(
           reminderDate: reminder.date,
           title: "Deadline Passed: ${reminder.title}",
           body: "A reminder scheduled for ${DateFormat('h:mm a').format(reminder.date)} has passed",
         );
-
-        // Mark this reminder as notified
-        _notifiedReminderIds.add(reminderId);
+        ReminderNotifier.notifiedReminderIds.add(reminderId);
       }
     }
   }
