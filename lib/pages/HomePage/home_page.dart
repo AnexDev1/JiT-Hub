@@ -3,11 +3,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:nex_planner/pages/HomePage/Category/Tools/ClassSchedule/class_schedule.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../model/schedule_item.dart';
+import '../../provider/classSchedule_provider.dart';
 import 'AppDrawer/app_drawer.dart';
 import 'Category/category_list_tile.dart';
 import 'gradient_container.dart';
@@ -473,190 +476,164 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return map[title] ?? Colors.blueGrey;
   }
 }
-
-// In your _HomePageState class, add this method
+// Dart
 Widget _buildTodaySchedule(BuildContext context) {
-  final todaySchedule = _getTodaySchedule();
+  final String today = DateFormat('EEEE').format(DateTime.now());
+  const Color fixedBluish = Color(0xFF6366F1);
 
-  if (todaySchedule.isEmpty) {
-    return const SizedBox.shrink();
-  }
+  return Consumer<ClassScheduleProvider>(
+    builder: (context, provider, _) {
+      final todaySchedule = provider.getSchedules(today);
 
-  return Padding(
-    padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      if (todaySchedule.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Today\'s Classes',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                // Navigate to full class schedule
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context)=> const ClassSchedule()
-                 )
-                );
-              },
-              child: Text(
-                'View All',
-                style: GoogleFonts.poppins(
-                  color: const Color(0xFF6366F1),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Today\'s Classes',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
                 ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const ClassSchedule(),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    'View All',
+                    style: GoogleFonts.poppins(
+                      color: fixedBluish,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 110,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: todaySchedule.length,
+                itemBuilder: (context, index) {
+                  final schedule = todaySchedule[index];
+                  return Container(
+                    width: 220,
+                    margin: const EdgeInsets.only(right: 16, bottom: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: fixedBluish.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Top bar with fixed bluish color
+                        Container(
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: fixedBluish,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: fixedBluish.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Icon(
+                                      Ionicons.time_outline,
+                                      color: fixedBluish,
+                                      size: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    schedule.time,
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey[700],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                schedule.courseName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Ionicons.location_outline,
+                                    color: Colors.grey[600],
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      schedule.roomNo,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: Colors.grey[600],
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ],
         ),
-        SizedBox(
-          height: 135,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: todaySchedule.length,
-            itemBuilder: (context, index) {
-              final schedule = todaySchedule[index];
-              return Container(
-                width: 250,
-                margin: const EdgeInsets.only(right: 16, bottom: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: schedule.color,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: schedule.color.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  Ionicons.time_outline,
-                                  color: schedule.color,
-                                  size: 16,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                schedule.time,
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            schedule.subject,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(
-                                Ionicons.location_outline,
-                                color: Colors.grey[600],
-                                size: 14,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                schedule.location,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    ),
+      );
+    },
   );
-}
-
-// Add this method to get today's schedule
-List<ScheduleItem> _getTodaySchedule() {
-  // In a real app, you'd fetch this data from a provider or database
-  final weekday = DateTime.now().weekday;
-
-  // Return empty list for weekend (6=Saturday, 7=Sunday)
-  if (weekday > 5) {
-    return [];
-  }
-
-  // Sample data for weekdays - replace with actual data source
-  return [
-
-    ScheduleItem(
-      subject: 'Advanced Programming',
-      time: '9:00 AM - 10:30 AM',
-      location: 'Room 205, Block B',
-      instructor: 'Dr. Johnson',
-      color: Colors.indigo,
-    ),
-    ScheduleItem(
-      subject: 'Database Systems',
-      time: '11:00 AM - 12:30 PM',
-      location: 'Computer Lab 3',
-      instructor: 'Prof. Williams',
-      color: Colors.teal,
-    ),
-    ScheduleItem(
-      subject: 'Computer Networks',
-      time: '2:00 PM - 3:30 PM',
-      location: 'Room 103, Block A',
-      instructor: 'Dr. Smith',
-      color: Colors.amber[700]!,
-    ),
-  ];
 }

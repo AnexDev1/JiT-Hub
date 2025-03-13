@@ -17,10 +17,10 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Schedule()
-      ..day = fields[0] as String
+      ..roomNo = fields[0] as String
       ..time = fields[1] as String
-      ..course = fields[2] as String
-      ..room = fields[3] as String;
+      ..courseName = fields[2] as String
+      ..day = fields[3] as String;
   }
 
   @override
@@ -28,13 +28,13 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
     writer
       ..writeByte(4)
       ..writeByte(0)
-      ..write(obj.day)
+      ..write(obj.roomNo)
       ..writeByte(1)
       ..write(obj.time)
       ..writeByte(2)
-      ..write(obj.course)
+      ..write(obj.courseName)
       ..writeByte(3)
-      ..write(obj.room);
+      ..write(obj.day);
   }
 
   @override

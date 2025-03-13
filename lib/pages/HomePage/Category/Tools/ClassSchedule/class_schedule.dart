@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../../../../../model/schedule.dart';
 import '../../../../../provider/classSchedule_provider.dart';
 import 'add_schedule.dart';
@@ -18,27 +19,43 @@ class _ClassScheduleState extends State<ClassSchedule> with SingleTickerProvider
   final List<String> _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   final Map<String, Color> _courseColors = {};
   final List<Color> _colorOptions = [
-    Color(0xFF1E88E5), Color(0xFF43A047), Color(0xFFE53935),
-    Color(0xFF5E35B1), Color(0xFFFFB300), Color(0xFF00ACC1),
-    Color(0xFF8E24AA), Color(0xFF3949AB), Color(0xFF039BE5),
+    const Color(0xFF4361EE),
+    const Color(0xFF3A86FF),
+    const Color(0xFF4CC9F0),
+    const Color(0xFFF72585),
+    const Color(0xFF7209B7),
+    const Color(0xFF4895EF),
+    const Color(0xFF560BAD),
+    const Color(0xFF480CA8),
+    const Color(0xFF3F37C9),
   ];
+
+  DateTime _now = DateTime.now();
+  bool _isScrolled = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: _weekdays.length, vsync: this);
 
-    // Get current day and set appropriate tab
-    final now = DateTime.now();
-    int weekday = now.weekday; // Monday is 1, Sunday is 7
-    if (weekday < 7) {
-      // Set to current day if it's Monday-Saturday
+    // Set tab to current day
+    int weekday = _now.weekday;
+    if (weekday >= 1 && weekday <= 6) {
       _tabController.animateTo(weekday - 1);
+    }
+
+    _tabController.addListener(_handleTabChange);
+  }
+
+  void _handleTabChange() {
+    if (_tabController.indexIsChanging) {
+      setState(() {});
     }
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
     super.dispose();
   }
@@ -55,98 +72,204 @@ class _ClassScheduleState extends State<ClassSchedule> with SingleTickerProvider
     if (text.isEmpty) return '';
     final words = text.split(' ');
     if (words.length == 1) return words[0].substring(0, min(2, words[0].length)).toUpperCase();
-
     return words.take(2).map((word) => word.isNotEmpty ? word[0] : '').join('').toUpperCase();
   }
 
   int min(int a, int b) => a < b ? a : b;
 
+  String _getFormattedDate(int dayIndex) {
+    final now = DateTime.now();
+    final int currentWeekday = now.weekday;
+    final int difference = dayIndex + 1 - currentWeekday;
+
+    final targetDate = now.add(Duration(days: difference));
+    return DateFormat('MMM d').format(targetDate);
+  }
+
+  bool _isCurrentDay(int index) {
+    return _now.weekday == index + 1;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
+      backgroundColor: Colors.white,
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification is ScrollUpdateNotification) {
+            setState(() {
+              _isScrolled = notification.metrics.pixels > 0;
+            });
+          }
+          return false;
+        },
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
             SliverAppBar(
-              title: Text(
-                'Class Schedule',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              centerTitle: false,
+              expandedHeight: 120.0,
               floating: true,
               pinned: true,
-              forceElevated: innerBoxIsScrolled,
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(kToolbarHeight),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                  ),
-                  child: TabBar(
-                    controller: _tabController,
-                    isScrollable: true,
-                    dividerColor: Colors.transparent,
-                    tabAlignment: TabAlignment.start,
-                    indicator: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.grey[700],
-                    labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    tabs: _weekdays.map((day) => Tab(text: day)).toList(),
+              elevation: 0,
+              backgroundColor: Colors.white,
+              flexibleSpace: FlexibleSpaceBar(
+                titlePadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                title: null,
+                background: Container(
+                  padding: const EdgeInsets.fromLTRB(16, 60, 16, 0),
+                  alignment: Alignment.topLeft,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Class Schedule',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 28,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Manage your weekly classes',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ];
-        },
-        body: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: TabBarView(
-            controller: _tabController,
-            children: _weekdays.map((day) {
-              return Consumer<ClassScheduleProvider>(
-                builder: (context, provider, child) {
-                  final schedules = provider.getSchedules(day);
-                  schedules.sort((a, b) => _compareTime(a.time, b.time));
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  // Day selector
+                  Container(
+                    height: 100,
+                    margin: const EdgeInsets.only(top: 8),
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: _weekdays.length,
+                      itemBuilder: (context, index) {
+                        final isSelected = _tabController.index == index;
+                        final isToday = _isCurrentDay(index);
 
-                  if (schedules.isEmpty) {
-                    return _buildEmptyState(day);
-                  }
+                        return GestureDetector(
+                          onTap: () {
+                            _tabController.animateTo(index);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            margin: const EdgeInsets.only(right: 12),
+                            width: 70,
+                            decoration: BoxDecoration(
+                              gradient: isSelected ? LinearGradient(
+                                colors: [
+                                  const Color(0xFF4361EE),
+                                  const Color(0xFF3A86FF),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ) : null,
+                              color: isSelected ? null :
+                              isToday ? const Color(0xFFE8F1FD) : Colors.grey[100],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _weekdays[index].substring(0, 3),
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected ? Colors.white :
+                                    isToday ? const Color(0xFF4361EE) : Colors.black54,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _getFormattedDate(index),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: isSelected ? Colors.white70 :
+                                    isToday ? const Color(0xFF4361EE) : Colors.black45,
+                                  ),
+                                ),
+                                if (isToday && !isSelected)
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 4),
+                                    width: 6,
+                                    height: 6,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF4361EE),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    itemCount: schedules.length,
-                    itemBuilder: (context, index) {
-                      final schedule = schedules[index];
-                      final isFirst = index == 0;
-                      final isLast = index == schedules.length - 1;
+                  // Schedule content
+                  Container(
+                    height: MediaQuery.of(context).size.height - 280,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: _weekdays.map((day) {
+                        return Consumer<ClassScheduleProvider>(
+                          builder: (context, provider, child) {
+                            final schedules = provider.getSchedules(day);
+                            schedules.sort((a, b) => _compareTime(a.time, b.time));
 
-                      return _buildScheduleItem(
-                        schedule,
-                        isFirst: isFirst,
-                        isLast: isLast,
-                        showConnector: !isLast,
-                      );
-                    },
-                  );
-                },
-              );
-            }).toList(),
-          ),
+                            if (schedules.isEmpty) {
+                              return _buildEmptyState(day);
+                            }
+
+                            return AnimationLimiter(
+                              child: ListView.builder(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: schedules.length,
+                                itemBuilder: (context, index) {
+                                  return AnimationConfiguration.staggeredList(
+                                    position: index,
+                                    duration: const Duration(milliseconds: 375),
+                                    child: SlideAnimation(
+                                      verticalOffset: 50.0,
+                                      child: FadeInAnimation(
+                                        child: _buildScheduleItem(
+                                          schedules[index],
+                                          isFirst: index == 0,
+                                          isLast: index == schedules.length - 1,
+                                          showConnector: index < schedules.length - 1,
+                                          context: context,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           final currentDay = _weekdays[_tabController.index];
           Navigator.push(
@@ -157,18 +280,17 @@ class _ClassScheduleState extends State<ClassSchedule> with SingleTickerProvider
                   final schedule = Schedule()
                     ..day = currentDay
                     ..time = time
-                    ..course = course
-                    ..room = room;
+                    ..courseName = course
+                    ..roomNo = room;
                   Provider.of<ClassScheduleProvider>(context, listen: false).addSchedule(schedule);
                 },
               ),
             ),
           );
         },
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: Text('Add Class', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+        elevation: 4,
+        backgroundColor: const Color(0xFF4361EE),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -178,26 +300,33 @@ class _ClassScheduleState extends State<ClassSchedule> with SingleTickerProvider
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.event_busy,
-            size: 80,
-            color: Colors.grey[400],
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.calendar_today_rounded,
+              size: 60,
+              color: const Color(0xFF4361EE),
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Text(
             'No Classes for $day',
-            style: GoogleFonts.inter(
-              fontSize: 20,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Tap the + button to add your classes',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 14,
-              color: Colors.grey[500],
+              color: Colors.black54,
             ),
           ),
         ],
@@ -205,193 +334,250 @@ class _ClassScheduleState extends State<ClassSchedule> with SingleTickerProvider
     );
   }
 
-  Widget _buildScheduleItem(Schedule schedule, {
-    required bool isFirst,
-    required bool isLast,
-    required bool showConnector,
-  }) {
-    final courseColor = _getCourseColor(schedule.course);
-    final acronym = _getAcronym(schedule.course);
+  Widget _buildScheduleItem(
+      Schedule schedule, {
+        required bool isFirst,
+        required bool isLast,
+        required bool showConnector,
+        required BuildContext context,
+      }) {
+    final courseColor = _getCourseColor(schedule.courseName);
+    final acronym = _getAcronym(schedule.courseName);
+
+    // Parse time for duration calculation
+    String startTime = schedule.time.split(" - ")[0];
+    final format = DateFormat('h:mm a');
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Timeline column
-            SizedBox(
-              width: 80,
-              child: Column(
-                children: [
-                  Text(
-                    schedule.time,
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                      color: Colors.black87,
-                    ),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Time column
+          SizedBox(
+            width: 70,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  startTime,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Colors.black87,
                   ),
-                  // Timeline connector
-                  if (showConnector)
-                    Expanded(
-                      child: Container(
-                        width: 2,
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        color: Colors.grey[300],
-                      ),
-                    ),
+                ),
+
+              ],
+            ),
+          ),
+
+          // Course card
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: courseColor.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
                 ],
               ),
-            ),
-
-            // Schedule card
-            Expanded(
-              child: Card(
-                margin: EdgeInsets.zero,
-                elevation: 2,
-                shadowColor: courseColor.withValues(alpha:0.3),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: courseColor.withValues(alpha:0.3)),
-                  ),
-                  child: IntrinsicHeight(
-                    child: Row(
-                      children: [
-                        // Color accent bar
-                        Container(
-                          width: 6,
-                          decoration: BoxDecoration(
-                            color: courseColor,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(12),
-                              bottomLeft: Radius.circular(12),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    splashColor: courseColor.withOpacity(0.1),
+                    onTap: () {
+                      // Show class details or edit options
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          // Course avatar
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  courseColor,
+                                  courseColor.withOpacity(0.7),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(15),
                             ),
-                          ),
-                        ),
-
-                        // Course avatar
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: CircleAvatar(
-                            radius: 24,
-                            backgroundColor: courseColor.withValues(alpha:0.2),
-                            child: Text(
-                              acronym,
-                              style: GoogleFonts.inter(
-                                color: courseColor,
-                                fontWeight: FontWeight.bold,
+                            child: Center(
+                              child: Text(
+                                acronym,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                           ),
-                        ),
 
-                        // Course details
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
+                          const SizedBox(width: 16),
+
+                          // Course details
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  schedule.course,
-                                  style: GoogleFonts.inter(
-                                    fontWeight: FontWeight.w700,
+                                  schedule.courseName,
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w600,
                                     fontSize: 16,
+                                    color: Colors.black87,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 6),
                                 Row(
                                   children: [
-                                    Icon(
-                                      Icons.location_on_outlined,
-                                      size: 16,
-                                      color: Colors.grey[600],
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Room ${schedule.room}',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.grey[600],
-                                        fontSize: 14,
+                                    Flexible(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade100,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.location_on_outlined,
+                                              size: 14,
+                                              color: Colors.black54,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Flexible(
+                                              child: Text(
+                                                'Room ${schedule.roomNo}',
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 12,
+                                                  color: Colors.black54,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ],
-                                ),
+                                )
                               ],
                             ),
                           ),
-                        ),
 
-                        // Delete button
-                        IconButton(
-                          icon: Icon(
-                            Icons.delete_outline,
-                            color: Colors.grey[600],
-                          ),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text(
-                                  'Delete Class',
-                                  style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                          // Menu button
+                          PopupMenuButton(
+                            icon: Icon(
+                              Icons.more_vert,
+                              color: Colors.grey.shade600,
+                            ),
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit_outlined, size: 18),
+                                    const SizedBox(width: 8),
+                                    Text('Edit'),
+                                  ],
                                 ),
-                                content: Text(
-                                  'Are you sure you want to delete ${schedule.course}?',
-                                  style: GoogleFonts.inter(),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    child: Text(
-                                      'Cancel',
-                                      style: GoogleFonts.inter(),
-                                    ),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                  TextButton(
-                                    child: Text(
-                                      'Delete',
-                                      style: GoogleFonts.inter(color: Colors.red),
-                                    ),
-                                    onPressed: () {
-                                      Provider.of<ClassScheduleProvider>(context, listen: false)
-                                          .deleteSchedule(schedule);
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ],
                               ),
-                            );
-                          },
-                        ),
-                      ],
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                                    const SizedBox(width: 8),
+                                    Text('Delete', style: TextStyle(color: Colors.red)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            onSelected: (value) {
+                              if (value == 'delete') {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    title: Text(
+                                      'Delete Class',
+                                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                                    ),
+                                    content: Text(
+                                      'Are you sure you want to delete ${schedule.courseName}?',
+                                      style: GoogleFonts.poppins(),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        child: Text(
+                                          'Cancel',
+                                          style: GoogleFonts.poppins(),
+                                        ),
+                                        onPressed: () => Navigator.pop(context),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Delete',
+                                          style: GoogleFonts.poppins(color: Colors.white),
+                                        ),
+                                        onPressed: () {
+                                          Provider.of<ClassScheduleProvider>(context, listen: false)
+                                              .deleteSchedule(schedule);
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   int _compareTime(String time1, String time2) {
-    // Parse time strings like "10:00 AM" to compare them
     try {
       final format = DateFormat('h:mm a');
-      final dateTime1 = format.parse(time1);
-      final dateTime2 = format.parse(time2);
+      final dateTime1 = format.parse(time1.split(" - ")[0]);
+      final dateTime2 = format.parse(time2.split(" - ")[0]);
       return dateTime1.compareTo(dateTime2);
     } catch (e) {
-      // Fallback to string comparison if parsing fails
       return time1.compareTo(time2);
     }
   }

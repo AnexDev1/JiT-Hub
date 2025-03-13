@@ -1,17 +1,17 @@
 import 'dart:ui';
 
 class ScheduleItem {
-  final String subject;
+  final String courseName;
   final String time;
-  final String location;
-  final String instructor;
+  final String roomNo;
+
   final Color color;
 
   ScheduleItem({
-    required this.subject,
+    required this.courseName,
     required this.time,
-    required this.location,
-    required this.instructor,
+    required this.roomNo,
+
     required this.color,
   });
 }

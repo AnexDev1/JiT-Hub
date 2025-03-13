@@ -5,14 +5,14 @@ part 'schedule.g.dart';
 @HiveType(typeId: 1)
 class Schedule extends HiveObject {
   @HiveField(0)
-  late String day;
+  late String roomNo;
 
   @HiveField(1)
   late String time;
 
   @HiveField(2)
-  late String course;
+  late String courseName;
 
   @HiveField(3)
-  late String room;
+  late String day;
 }
