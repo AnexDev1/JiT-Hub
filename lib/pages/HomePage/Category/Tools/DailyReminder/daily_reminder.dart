@@ -44,7 +44,7 @@ class DailyReminder extends StatefulWidget {
 class _DailyReminderState extends State<DailyReminder> {
   Timer? _timer;
   // Keep track of which reminder IDs have already been notified
-  final Set<int> _notifiedReminderIds = {};
+  final Set<String> _notifiedReminderIds = {};
   @override
     void initState(){
     super.initState();
@@ -52,7 +52,13 @@ class _DailyReminderState extends State<DailyReminder> {
       checkPassedDeadlinesAndNotify(context);
       scheduleUpcomingNotifications(context);
     });
-
+    Timer.periodic(const Duration(seconds: 5), (_) {
+      if (mounted) {
+        setState(() {
+          // Just refresh UI to update status labels
+        });
+      }
+    });
     //set a timer to check for passed deadlines every minute
     _timer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (mounted) {
@@ -75,7 +81,8 @@ class _DailyReminderState extends State<DailyReminder> {
       final reminder = reminderProvider.reminders[i];
 
       // Get a unique identifier for this reminder
-      final int reminderId = i;
+      final String reminderId = "${reminder.title}_${reminder.date.millisecondsSinceEpoch}";
+
 
       // Only send notification if we haven't notified for this reminder yet
       if (reminder.remindMe && reminder.date.isBefore(now) && !_notifiedReminderIds.contains(reminderId)) {
