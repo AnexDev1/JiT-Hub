@@ -16,52 +16,71 @@ class _GalleryPageState extends State<GalleryPage> {
   final List<GalleryItem> galleryItems = [
     GalleryItem(
       id: '1',
-      imageUrl: 'lib/assets/biomedical.jpg',
+      imageUrl: 'lib/assets/gallery/image1.jpg',
       title: 'University Library',
       description: 'The main library building on campus',
     ),
     GalleryItem(
       id: '2',
-      imageUrl: 'lib/assets/civil.jpg',
+      imageUrl: 'lib/assets/gallery/image2.png',
       title: 'Graduation Ceremony',
       description: 'Students celebrating their achievements',
     ),
     GalleryItem(
       id: '3',
-      imageUrl: 'lib/assets/electrical.jpg',
+      imageUrl: 'lib/assets/gallery/image3.jpg',
       title: 'Sports Complex',
       description: 'Students enjoying various sports activities',
     ),
     GalleryItem(
       id: '4',
-      imageUrl: 'lib/assets/computing.jpg',
+      imageUrl: 'lib/assets/gallery/image4.jpg',
       title: 'Campus Cafeteria',
       description: 'Where students gather for meals and conversations',
     ),
     GalleryItem(
       id: '5',
-      imageUrl: 'lib/assets/biomedical.jpg',
+      imageUrl: 'lib/assets/gallery/image5.jpg',
       title: 'Science Laboratory',
       description: 'State-of-the-art research facilities',
     ),
     GalleryItem(
       id: '6',
-      imageUrl:  'lib/assets/civil.jpg',
+      imageUrl:  'lib/assets/gallery/image6.jpg',
       title: 'Cultural Event',
       description: 'Annual cultural celebration on campus',
     ),
     GalleryItem(
       id: '7',
-      imageUrl: 'lib/assets/civil.jpg',
+      imageUrl: 'lib/assets/gallery/image7.jpg',
       title: 'Student Dormitories',
       description: 'On-campus accommodation facilities',
     ),
     GalleryItem(
       id: '8',
-      imageUrl:  'lib/assets/aviation.jpg',
+      imageUrl:  'lib/assets/gallery/image8.jpg',
       title: 'Campus Garden',
       description: 'Green space for relaxation and study',
     ),
+
+    GalleryItem(id: '9', imageUrl:  'lib/assets/gallery/image9.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '10', imageUrl:  'lib/assets/gallery/image10.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '11', imageUrl:  'lib/assets/gallery/image11.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '12', imageUrl:  'lib/assets/gallery/image12.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '13', imageUrl:  'lib/assets/gallery/image13.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '14', imageUrl:  'lib/assets/gallery/image14.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '15', imageUrl:  'lib/assets/gallery/image15.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '16', imageUrl:  'lib/assets/gallery/image16.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '17', imageUrl:  'lib/assets/gallery/image17.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '18', imageUrl:  'lib/assets/gallery/image18.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '19', imageUrl:  'lib/assets/gallery/image19.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '20', imageUrl:  'lib/assets/gallery/image20.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '21', imageUrl:  'lib/assets/gallery/image21.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '22', imageUrl:  'lib/assets/gallery/image22.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '23', imageUrl:  'lib/assets/gallery/image23.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+    GalleryItem(id: '24', imageUrl:  'lib/assets/gallery/image24.jpg', title: 'garden', description: 'Green space for relaxation and study'),
+
+
   ];
 
   @override
@@ -166,7 +185,7 @@ class GalleryItemWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha:0.1),
               blurRadius: 5,
               offset: const Offset(0, 2),
             ),
@@ -314,7 +333,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.7),
+                        Colors.black.withValues(alpha:0.7),
                       ],
                     ),
                   ),

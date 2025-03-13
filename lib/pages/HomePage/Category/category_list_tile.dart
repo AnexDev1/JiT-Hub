@@ -199,7 +199,8 @@ class _CategoryTabState extends State<CategoryListTile> with SingleTickerProvide
       'Study AI': Ionicons.bulb,
       'Cafe Menu': Ionicons.restaurant,
       'Gallery': Ionicons.images,
-      'Religious': Ionicons.star,
+      'Religious': Ionicons.book,
+      'Campus Navigation': Ionicons.location,
     };
 
     return map[title] ?? Ionicons.apps;

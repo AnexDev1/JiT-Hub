@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../model/campus_location.dart';
 class CampusNavigationPage extends StatefulWidget {
@@ -164,17 +165,40 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
           width: 100,
           height: 20,
           point: _userLocation!,
-          child:  const CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.blue,
-            child: Text('U', style:TextStyle(color: Colors.white)),
-          ),
+          child:  _buildUserMarker(),
         ),
       );
     }
     return campusMarkers;
   }
+// dart
+  Widget _buildUserMarker() {
+    return Container(
 
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          colors: [Colors.blue, Colors.blueAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withValues(alpha:0.6),
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.person,
+          color: Colors.white,
+          size: 30,
+        ),
+      ),
+    );
+  }
   Color _getMarkerColor(LocationCategory category) {
     switch (category) {
       case LocationCategory.academic:
@@ -244,13 +268,16 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
     setState(() {
       _isLoading = true;
     });
+    await _checkLocationPermission();
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return;
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission != LocationPermission.whileInUse &&
-          permission != LocationPermission.always) return;
+          permission != LocationPermission.always) {
+        return;
+      }
     }
     final position = await Geolocator.getCurrentPosition();
     final userLatLng = LatLng(position.latitude, position.longitude);
@@ -264,7 +291,7 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
       _routePoints = smoothPolyline(routePoints);
       _isLoading = false;
     });
-    _mapController.move(location.position, 18);
+    _mapController.move(userLatLng, 18);
   }
   Future<List<LatLng>> _getRoute(LatLng origin, LatLng destination) async {
     final url =
@@ -317,6 +344,7 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
   @override
     void initState(){
     super.initState();
+    _checkLocationPermission();
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.best,
@@ -332,6 +360,12 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
   void dispose(){
     _positionStream.cancel();
     super.dispose();
+  }
+  Future<void> _checkLocationPermission() async {
+    var status = await Permission.location.status;
+    if(!status.isGranted) {
+      await Permission.location.request();
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -385,7 +419,7 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha:0.1),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -494,7 +528,7 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha:0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -509,7 +543,7 @@ class _CampusNavigationPageState extends State<CampusNavigationPage> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(

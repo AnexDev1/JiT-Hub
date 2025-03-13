@@ -184,7 +184,7 @@ class _AppDrawerState extends State<AppDrawer> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'JIT Campus v1.0.0',
+              'JIT Hub v1.2.3',
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 color: Colors.grey[500],

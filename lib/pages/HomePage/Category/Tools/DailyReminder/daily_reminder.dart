@@ -1,18 +1,140 @@
 // dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../provider/reminder_provider.dart';
+import '../../../../../services/notification_service.dart';
 import 'reminder_modal.dart';
 
-class DailyReminder extends StatelessWidget {
+class ReminderNotifier {
+  static Future<void> scheduleReminder({
+    required DateTime reminderDate,
+    required String title,
+    required String body,
+  }) async {
+    final now = DateTime.now();
+    // If the deadline is passed, schedule notification to trigger immediately
+    final DateTime scheduledDate = now.isAfter(reminderDate)
+        ? now.add(const Duration(seconds: 1))
+        : reminderDate;
+
+    // Create a unique ID that's within 32-bit integer range
+    // Use reminder time + random component to avoid collisions
+    final int notificationId = (reminderDate.millisecondsSinceEpoch % 1000000 +
+        DateTime.now().millisecondsSinceEpoch % 1000) % 2147483647;
+
+    await NotificationService().scheduleNotification(
+      id: notificationId,
+      title: title,
+      body: body,
+      scheduledDate: scheduledDate,
+    );
+  }
+}
+class DailyReminder extends StatefulWidget {
   const DailyReminder({super.key});
 
+  @override
+  State<DailyReminder> createState() => _DailyReminderState();
+}
+
+class _DailyReminderState extends State<DailyReminder> {
+  Timer? _timer;
+
+  @override
+    void initState(){
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkPassedDeadlinesAndNotify(context);
+      scheduleUpcomingNotifications(context);
+    });
+
+    //set a timer to check for passed deadlines every minute
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) {
+        setState(() {
+
+        });
+      }
+    });
+  }
+  @override
+    void dispose(){
+    _timer?.cancel();
+    super.dispose();
+  }
+  // Check for passed deadlines and send notifications
+  void checkPassedDeadlinesAndNotify(BuildContext context) {
+    final reminderProvider = Provider.of<ReminderProvider>(context, listen: false);
+    final now = DateTime.now();
+
+    for (int i = 0; i < reminderProvider.reminders.length; i++) {
+      final reminder = reminderProvider.reminders[i];
+
+      // If deadline passed and notification is enabled
+      if (reminder.remindMe && reminder.date.isBefore(now)) {
+        ReminderNotifier.scheduleReminder(
+          reminderDate: reminder.date,
+          title: "Deadline Passed: ${reminder.title}",
+          body: "A reminder scheduled for ${DateFormat('h:mm a').format(reminder.date)} has passed",
+        );
+      }
+    }
+  }
+
+    void scheduleUpcomingNotifications(BuildContext context) {
+    final reminderProvider = Provider.of<ReminderProvider>(context, listen: false);
+    final now = DateTime.now();
+      for(int i = 0; i < reminderProvider.reminders.length; i++){
+        final reminder = reminderProvider.reminders[i];
+        if(reminder.remindMe && reminder.date.isAfter(now)){
+
+          //1 day before
+          _scheduleAdvanceNotification(reminder, const Duration(days:1));
+
+          //5 hours before
+          _scheduleAdvanceNotification(reminder, const Duration(hours:5));
+
+          //1 hour before
+          _scheduleAdvanceNotification(reminder, const Duration(hours:1));
+        }
+      }
+    }
+  void _scheduleAdvanceNotification(dynamic reminder, Duration timeFrame) {
+    final notificationTime = reminder.date.subtract(timeFrame);
+    final now = DateTime.now();
+
+    // Only schedule if the notification time is in the future
+    if (notificationTime.isAfter(now)) {
+      String timeMessage = "";
+      if (timeFrame.inDays >= 1) {
+        timeMessage = "tomorrow";
+      } else if (timeFrame.inHours >= 5) {
+        timeMessage = "in 5 hours";
+      } else {
+        timeMessage = "in 1 hour";
+      }
+
+      ReminderNotifier.scheduleReminder(
+        reminderDate: notificationTime,
+        title: "Upcoming: ${reminder.title}",
+        body: "You have a reminder due $timeMessage at ${DateFormat('h:mm a').format(reminder.date)}",
+      );
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final reminderProvider = Provider.of<ReminderProvider>(context);
     final theme = Theme.of(context);
+
+    // Check for passed deadlines when the page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkPassedDeadlinesAndNotify(context);
+    });
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -60,7 +182,7 @@ class DailyReminder extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: Colors.blue.withValues(alpha:0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -147,7 +269,6 @@ class DailyReminder extends StatelessWidget {
     );
   }
 
-// dart
   Widget _buildDateSection(
       BuildContext context,
       ReminderProvider provider,
@@ -155,7 +276,7 @@ class DailyReminder extends StatelessWidget {
       List<int> indices,
       String labelText,
       ) {
-    final theme = Theme.of(context);
+    // final theme = Theme.of(context);
     List<Widget> children = [];
 
     // Add date header if labelText is not "Today", "Tomorrow", and not a "Deadline Passed" message.
@@ -194,8 +315,6 @@ class DailyReminder extends StatelessWidget {
     );
   }
 
-// dart
-// dart
   Widget _buildReminderCard(BuildContext context, ReminderProvider provider, int index) {
     final reminder = provider.reminders[index];
     final DateFormat timeFormat = DateFormat('h:mm a');
@@ -282,7 +401,7 @@ class DailyReminder extends StatelessWidget {
                       width: 2,
                       height: 70,
                       decoration: BoxDecoration(
-                        color: _getCategoryColor(reminder.category).withOpacity(0.6),
+                        color: _getCategoryColor(reminder.category).withValues(alpha:0.6),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -315,7 +434,7 @@ class DailyReminder extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: _getCategoryColor(reminder.category).withOpacity(0.1),
+                                color: _getCategoryColor(reminder.category).withValues(alpha:0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
@@ -370,6 +489,7 @@ class DailyReminder extends StatelessWidget {
       ],
     );
   }
+
   Map<String, List<int>> _groupRemindersByDate(List<dynamic> reminders) {
     final Map<String, List<int>> grouped = {};
     final DateFormat dateFormat = DateFormat('yyyy-MM-dd');
@@ -482,7 +602,7 @@ class DailyReminder extends StatelessWidget {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  bool _deadlinePassed(DateTime reminderDate) {
-    return DateTime.now().isAfter(reminderDate);
-  }
+  // bool _deadlinePassed(DateTime reminderDate) {
+  //   return DateTime.now().isAfter(reminderDate);
+  // }
 }

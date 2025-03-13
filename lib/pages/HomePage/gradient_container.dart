@@ -141,6 +141,7 @@ class GradientContainer extends StatelessWidget {
                           'Assignment',
                           assignmentCount.toString(),
                           Colors.amber,
+                          context
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -150,6 +151,7 @@ class GradientContainer extends StatelessWidget {
                           'Exam',
                           examCount.toString(),
                           Colors.redAccent,
+                          context
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -159,6 +161,7 @@ class GradientContainer extends StatelessWidget {
                           'Study',
                           studyCount.toString(),
                           Colors.greenAccent,
+                          context
                         ),
                       ),
                     ],
@@ -204,54 +207,64 @@ class GradientContainer extends StatelessWidget {
     );
   }
 
-  // Fixed category widget to prevent overflow
+// dart
   Widget _buildCompactReminderCategory(
       IconData icon,
       String label,
       String count,
-      Color iconColor
+      Color iconColor,
+      BuildContext context,
       ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha:0.12),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha:0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              size: 16,
-              color: iconColor,
-            ),
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const DailyReminder(),
           ),
-          const SizedBox(height: 4),
-          Text(
-            count,
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 16,
+                color: iconColor,
+              ),
             ),
-          ),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.poppins(
-              fontSize: 10,
-              fontWeight: FontWeight.w400,
-              color: Colors.white.withValues(alpha:0.75),
+            const SizedBox(height: 4),
+            Text(
+              count,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
             ),
-          ),
-        ],
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.poppins(
+                fontSize: 10,
+                fontWeight: FontWeight.w400,
+                color: Colors.white.withValues(alpha: 0.75),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

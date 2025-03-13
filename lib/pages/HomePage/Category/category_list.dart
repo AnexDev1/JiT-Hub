@@ -34,7 +34,7 @@ class CategoryList extends StatelessWidget {
       'Study AI': const StudyAI(),
       'Cafe Menu': const CafeMenu(),
       'Religious': const ReligiousPage(),
-      'Campus Navigation': CampusNavigationPage(),
+      'Campus Navigation': const CampusNavigationPage(),
       'Gallery': const GalleryPage(),
     };
 
