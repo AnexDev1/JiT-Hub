@@ -9,7 +9,6 @@ import '../../../../../provider/reminder_provider.dart';
 import '../../../../../services/notification_service.dart';
 import 'reminder_modal.dart';
 
-// dart
 class ReminderNotifier {
   // Static set to persist notified reminders between page visits.
   static final Set<String> notifiedReminderIds = {};
@@ -36,6 +35,7 @@ class ReminderNotifier {
     );
   }
 }
+
 class DailyReminder extends StatefulWidget {
   const DailyReminder({super.key});
 
@@ -45,10 +45,8 @@ class DailyReminder extends StatefulWidget {
 
 class _DailyReminderState extends State<DailyReminder> {
   Timer? _timer;
-  // Keep track of which reminder IDs have already been notified
-  final Set<String> _notifiedReminderIds = {};
   @override
-    void initState(){
+  void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       checkPassedDeadlinesAndNotify(context);
@@ -57,25 +55,26 @@ class _DailyReminderState extends State<DailyReminder> {
     Timer.periodic(const Duration(seconds: 5), (_) {
       if (mounted) {
         setState(() {
-          // Just refresh UI to update status labels
+          // Refresh UI to update status labels.
         });
       }
     });
-    //set a timer to check for passed deadlines every minute
+    // Set a timer to check for passed deadlines every minute.
     _timer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (mounted) {
         setState(() {
-  checkPassedDeadlinesAndNotify(context);
+          checkPassedDeadlinesAndNotify(context);
         });
       }
     });
   }
+
   @override
-    void dispose(){
+  void dispose() {
     _timer?.cancel();
     super.dispose();
   }
-// dart
+
   void checkPassedDeadlinesAndNotify(BuildContext context) {
     final reminderProvider = Provider.of<ReminderProvider>(context, listen: false);
     final now = DateTime.now();
@@ -96,29 +95,28 @@ class _DailyReminderState extends State<DailyReminder> {
       }
     }
   }
-    void scheduleUpcomingNotifications(BuildContext context) {
+
+  void scheduleUpcomingNotifications(BuildContext context) {
     final reminderProvider = Provider.of<ReminderProvider>(context, listen: false);
     final now = DateTime.now();
-      for(int i = 0; i < reminderProvider.reminders.length; i++){
-        final reminder = reminderProvider.reminders[i];
-        if(reminder.remindMe && reminder.date.isAfter(now)){
-
-          //1 day before
-          _scheduleAdvanceNotification(reminder, const Duration(days:1));
-
-          //5 hours before
-          _scheduleAdvanceNotification(reminder, const Duration(hours:5));
-
-          //1 hour before
-          _scheduleAdvanceNotification(reminder, const Duration(hours:1));
-        }
+    for (int i = 0; i < reminderProvider.reminders.length; i++) {
+      final reminder = reminderProvider.reminders[i];
+      if (reminder.remindMe && reminder.date.isAfter(now)) {
+        // 1 day before.
+        _scheduleAdvanceNotification(reminder, const Duration(days: 1));
+        // 5 hours before.
+        _scheduleAdvanceNotification(reminder, const Duration(hours: 5));
+        // 1 hour before.
+        _scheduleAdvanceNotification(reminder, const Duration(hours: 1));
       }
     }
+  }
+
   void _scheduleAdvanceNotification(dynamic reminder, Duration timeFrame) {
     final notificationTime = reminder.date.subtract(timeFrame);
     final now = DateTime.now();
 
-    // Only schedule if the notification time is in the future
+    // Only schedule if the notification time is in the future.
     if (notificationTime.isAfter(now)) {
       String timeMessage = "";
       if (timeFrame.inDays >= 1) {
@@ -136,6 +134,7 @@ class _DailyReminderState extends State<DailyReminder> {
       );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final reminderProvider = Provider.of<ReminderProvider>(context);
@@ -188,7 +187,7 @@ class _DailyReminderState extends State<DailyReminder> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.blue.withValues(alpha:0.1),
+              color: Colors.blue.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -282,16 +281,14 @@ class _DailyReminderState extends State<DailyReminder> {
       List<int> indices,
       String labelText,
       ) {
-    // final theme = Theme.of(context);
     List<Widget> children = [];
 
-    // Add date header if labelText is not "Today", "Tomorrow", and not a "Deadline Passed" message.
     if (labelText != 'Today' &&
         labelText != 'Tomorrow' &&
         !labelText.startsWith('Deadline Passed')) {
       children.add(Padding(
         padding: const EdgeInsets.only(bottom: 8),
-        child:Container(
+        child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: Colors.grey[200],
@@ -309,7 +306,6 @@ class _DailyReminderState extends State<DailyReminder> {
       ));
     }
 
-    // Build reminder cards.
     children.addAll(indices.map((index) => _buildReminderCard(context, provider, index)));
 
     return Padding(
@@ -329,7 +325,6 @@ class _DailyReminderState extends State<DailyReminder> {
     final bool isTomorrow = _isSameDate(reminder.date, DateTime.now().add(Duration(days: 1)));
     final theme = Theme.of(context);
 
-    // Build the header tag if reminder is today or tomorrow.
     Widget headerTag = const SizedBox.shrink();
     if (isToday || isTomorrow) {
       headerTag = Row(
@@ -407,7 +402,7 @@ class _DailyReminderState extends State<DailyReminder> {
                       width: 2,
                       height: 70,
                       decoration: BoxDecoration(
-                        color: _getCategoryColor(reminder.category).withValues(alpha:0.6),
+                        color: _getCategoryColor(reminder.category).withOpacity(0.6),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -440,7 +435,7 @@ class _DailyReminderState extends State<DailyReminder> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: _getCategoryColor(reminder.category).withValues(alpha:0.1),
+                                color: _getCategoryColor(reminder.category).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
@@ -607,8 +602,4 @@ class _DailyReminderState extends State<DailyReminder> {
   bool _isSameDate(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
-
-  // bool _deadlinePassed(DateTime reminderDate) {
-  //   return DateTime.now().isAfter(reminderDate);
-  // }
 }
