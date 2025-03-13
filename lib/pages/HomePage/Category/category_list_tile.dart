@@ -18,9 +18,9 @@ class CategoryListTile extends StatefulWidget {
 class _CategoryTabState extends State<CategoryListTile> with SingleTickerProviderStateMixin {
   late List<Item> items;
   final List<String> _restrictedTitles = [
+
     'academic calendar',
     'cafe menu',
-    'class schedule',
     'gallery',
     'religious'
   ];
@@ -257,7 +257,7 @@ class _CategoryTabState extends State<CategoryListTile> with SingleTickerProvide
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];

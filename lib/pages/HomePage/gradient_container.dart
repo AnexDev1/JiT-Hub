@@ -38,7 +38,7 @@ class GradientContainer extends StatelessWidget {
         borderRadius: BorderRadius.circular(18.0),
         child: Stack(
           children: [
-            // Abstract design elements
+            // Abstract design elements (keep these)
             Positioned(
               right: -30,
               top: -30,
@@ -64,9 +64,9 @@ class GradientContainer extends StatelessWidget {
               ),
             ),
 
-            // Main content
+            // Main content with reduced spacing
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0), // Reduced vertical padding
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -76,7 +76,7 @@ class GradientContainer extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(6), // Reduced padding
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha:0.15),
                           borderRadius: BorderRadius.circular(10),
@@ -84,7 +84,7 @@ class GradientContainer extends StatelessWidget {
                         child: const Icon(
                           Ionicons.calendar_outline,
                           color: Colors.white,
-                          size: 18,
+                          size: 16, // Smaller icon
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -95,7 +95,7 @@ class GradientContainer extends StatelessWidget {
                             Text(
                               'Daily Reminder',
                               style: GoogleFonts.poppins(
-                                fontSize: 16,
+                                fontSize: 15, // Smaller text
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
                               ),
@@ -103,7 +103,7 @@ class GradientContainer extends StatelessWidget {
                             Text(
                               'Keep track of your activities',
                               style: GoogleFonts.poppins(
-                                fontSize: 11,
+                                fontSize: 10, // Smaller text
                                 fontWeight: FontWeight.w400,
                                 color: Colors.white.withValues(alpha:0.75),
                               ),
@@ -113,15 +113,15 @@ class GradientContainer extends StatelessWidget {
                       ),
                       if (totalCount > 0)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), // Reduced padding
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha:0.2),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             '$totalCount tasks',
                             style: GoogleFonts.poppins(
-                              fontSize: 11,
+                              fontSize: 10, // Smaller text
                               fontWeight: FontWeight.w500,
                               color: Colors.white,
                             ),
@@ -130,44 +130,44 @@ class GradientContainer extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10), // Reduced spacing
 
-                  // More compact reminder categories
+                  // Reminder categories row
                   Row(
                     children: [
                       Expanded(
                         child: _buildCompactReminderCategory(
-                          Ionicons.document_text_outline,
-                          'Assignment',
-                          assignmentCount.toString(),
-                          Colors.amber,
-                          context
+                            Ionicons.document_text_outline,
+                            'Assignment',
+                            assignmentCount.toString(),
+                            Colors.amber,
+                            context
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: _buildCompactReminderCategory(
-                          Ionicons.school_outline,
-                          'Exam',
-                          examCount.toString(),
-                          Colors.redAccent,
-                          context
+                            Ionicons.school_outline,
+                            'Exam',
+                            examCount.toString(),
+                            Colors.redAccent,
+                            context
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: _buildCompactReminderCategory(
-                          Ionicons.book_outline,
-                          'Study',
-                          studyCount.toString(),
-                          Colors.greenAccent,
-                          context
+                            Ionicons.book_outline,
+                            'Study',
+                            studyCount.toString(),
+                            Colors.greenAccent,
+                            context
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10), // Reduced spacing
 
                   // Button
                   SizedBox(
@@ -177,7 +177,7 @@ class GradientContainer extends StatelessWidget {
                         backgroundColor: Colors.white,
                         foregroundColor: const Color(0xFF4338CA),
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        padding: const EdgeInsets.symmetric(vertical: 8), // Reduced padding
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -188,12 +188,12 @@ class GradientContainer extends StatelessWidget {
                           builder: (context) => const DailyReminder(),
                         ));
                       },
-                      icon: const Icon(Ionicons.add_circle, size: 16),
+                      icon: const Icon(Ionicons.add_circle, size: 14), // Smaller icon
                       label: Text(
                         'Add New Task',
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w600,
-                          fontSize: 13,
+                          fontSize: 12, // Smaller text
                         ),
                       ),
                     ),
@@ -207,7 +207,7 @@ class GradientContainer extends StatelessWidget {
     );
   }
 
-// dart
+  // Update the reminder category method too
   Widget _buildCompactReminderCategory(
       IconData icon,
       String label,
@@ -224,7 +224,7 @@ class GradientContainer extends StatelessWidget {
         );
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6), // Reduced padding
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(12),
@@ -233,22 +233,22 @@ class GradientContainer extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(5), // Reduced padding
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                size: 16,
+                size: 14, // Smaller icon
                 color: iconColor,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3), // Reduced spacing
             Text(
               count,
               style: GoogleFonts.poppins(
-                fontSize: 16,
+                fontSize: 14, // Smaller text
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
               ),
@@ -258,7 +258,7 @@ class GradientContainer extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.poppins(
-                fontSize: 10,
+                fontSize: 9, // Smaller text
                 fontWeight: FontWeight.w400,
                 color: Colors.white.withValues(alpha: 0.75),
               ),
