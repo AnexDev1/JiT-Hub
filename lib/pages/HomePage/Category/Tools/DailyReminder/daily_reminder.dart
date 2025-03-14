@@ -10,7 +10,6 @@ import '../../../../../services/notification_service.dart';
 import 'reminder_modal.dart';
 
 class ReminderNotifier {
-  // Static set to persist notified reminders between page visits.
   static final Set<String> notifiedReminderIds = {};
 
   static Future<void> scheduleReminder({
@@ -48,10 +47,7 @@ class _DailyReminderState extends State<DailyReminder> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      checkPassedDeadlinesAndNotify(context);
-      scheduleUpcomingNotifications(context);
-    });
+
     Timer.periodic(const Duration(seconds: 5), (_) {
       if (mounted) {
         setState(() {
@@ -59,14 +55,7 @@ class _DailyReminderState extends State<DailyReminder> {
         });
       }
     });
-    // Set a timer to check for passed deadlines every minute.
-    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (mounted) {
-        setState(() {
-          checkPassedDeadlinesAndNotify(context);
-        });
-      }
-    });
+    // Set a timer to check for passed deadlines every minute.);
   }
 
   @override
@@ -74,67 +63,6 @@ class _DailyReminderState extends State<DailyReminder> {
     _timer?.cancel();
     super.dispose();
   }
-
-  void checkPassedDeadlinesAndNotify(BuildContext context) {
-    final reminderProvider = Provider.of<ReminderProvider>(context, listen: false);
-    final now = DateTime.now();
-
-    for (int i = 0; i < reminderProvider.reminders.length; i++) {
-      final reminder = reminderProvider.reminders[i];
-      final String reminderId = "${reminder.title}_${reminder.date.millisecondsSinceEpoch}";
-
-      // Use the static set so notifications are only triggered once.
-      if (reminder.remindMe && reminder.date.isBefore(now) &&
-          !ReminderNotifier.notifiedReminderIds.contains(reminderId)) {
-        ReminderNotifier.scheduleReminder(
-          reminderDate: reminder.date,
-          title: "Deadline Passed: ${reminder.title}",
-          body: "A reminder scheduled for ${DateFormat('h:mm a').format(reminder.date)} has passed",
-        );
-        ReminderNotifier.notifiedReminderIds.add(reminderId);
-      }
-    }
-  }
-
-  void scheduleUpcomingNotifications(BuildContext context) {
-    final reminderProvider = Provider.of<ReminderProvider>(context, listen: false);
-    final now = DateTime.now();
-    for (int i = 0; i < reminderProvider.reminders.length; i++) {
-      final reminder = reminderProvider.reminders[i];
-      if (reminder.remindMe && reminder.date.isAfter(now)) {
-        // 1 day before.
-        _scheduleAdvanceNotification(reminder, const Duration(days: 1));
-        // 5 hours before.
-        _scheduleAdvanceNotification(reminder, const Duration(hours: 5));
-        // 1 hour before.
-        _scheduleAdvanceNotification(reminder, const Duration(hours: 1));
-      }
-    }
-  }
-
-  void _scheduleAdvanceNotification(dynamic reminder, Duration timeFrame) {
-    final notificationTime = reminder.date.subtract(timeFrame);
-    final now = DateTime.now();
-
-    // Only schedule if the notification time is in the future.
-    if (notificationTime.isAfter(now)) {
-      String timeMessage = "";
-      if (timeFrame.inDays >= 1) {
-        timeMessage = "tomorrow";
-      } else if (timeFrame.inHours >= 5) {
-        timeMessage = "in 5 hours";
-      } else {
-        timeMessage = "in 1 hour";
-      }
-
-      ReminderNotifier.scheduleReminder(
-        reminderDate: notificationTime,
-        title: "Upcoming: ${reminder.title}",
-        body: "You have a reminder due $timeMessage at ${DateFormat('h:mm a').format(reminder.date)}",
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final reminderProvider = Provider.of<ReminderProvider>(context);

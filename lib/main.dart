@@ -12,10 +12,14 @@ import 'package:nex_planner/pages/HomePage/home_page.dart';
 import 'package:nex_planner/pages/OnboardingPage/onboarding_page.dart';
 import 'package:nex_planner/provider/reminder_provider.dart';
 import 'package:nex_planner/provider/classSchedule_provider.dart';
+import 'package:nex_planner/services/reminder_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// lib/main.dart
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Add this line
+
   await Hive.initFlutter();
   Hive.registerAdapter(ReminderAdapter());
   Hive.registerAdapter(ScheduleAdapter());
@@ -26,10 +30,19 @@ void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool onboardingComplete = prefs.getBool('onboardingComplete') ?? false;
   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+  // Create a single instance and use it everywhere
+  final reminderProvider = ReminderProvider();
+  await reminderProvider.loadReminders();
+
+  // Initialize reminder service with the same instance
+  await ReminderService().initialize(reminderProvider);
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ReminderProvider()..loadReminders()),
+        // Use the existing instance, don't create a new one
+        ChangeNotifierProvider.value(value: reminderProvider),
         ChangeNotifierProvider(create: (context) => ClassScheduleProvider()),
       ],
       child: MyApp(onboardingComplete: onboardingComplete, isLoggedIn: isLoggedIn),
